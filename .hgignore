@@ -8,4 +8,4 @@ priv\/log\/.*
 \.eunit.*
 deps\/.*
 \.dump
-ebin/*.app
+ebin\/.*.app
