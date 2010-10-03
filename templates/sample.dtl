@@ -1,0 +1,1 @@
+<html><body>Hello from inside ErlyDTL. You passed in {{ param }}.</body></html>
