@@ -1,0 +1,8 @@
+<html>
+  <body>
+    <h1>Snippet View</h1>
+    <h2>{{ title }}</h2>
+    <p>Left: {{ left }}</p>
+    <p>Right: {{ right }}</p>
+  </body>
+</html>

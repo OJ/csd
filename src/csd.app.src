@@ -2,7 +2,7 @@
 {application, csd,
  [
   {description, "csd"},
-  {vsn, "1"},
+  {vsn, "0.0.1"},
   {modules, [
              csd,
              csd_app,
@@ -10,6 +10,7 @@
              csd_resource,
 
              % ErlyDTL templates
+             snippet_dtl,
              sample_dtl
             ]},
   {registered, []},
