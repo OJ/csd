@@ -1,11 +1,15 @@
-%% @author author <author@example.com>
-%% @copyright YYYY author.
-%% @doc Example webmachine_resource.
+%% @author OJ Reeves <oj@buffered.io>
+%% @copyright 2010 OJ Reeves
+%% @doc Webmachine resource that handles snippet-related actions
 
 -module(csd_web_snippet_resource).
+-author('OJ Reeves <oj@buffered.io>').
+
 -export([init/1, to_html/2]).
 
 -include_lib("webmachine/include/webmachine.hrl").
+
+%% ----------------------------------------------- Exported Functions
 
 init([]) -> {ok, undefined}.
 
