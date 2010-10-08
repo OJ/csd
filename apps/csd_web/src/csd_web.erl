@@ -1,9 +1,9 @@
 %% @author author <author@example.com>
 %% @copyright YYYY author.
 
-%% @doc csd startup code
+%% @doc csd_web startup code
 
--module(csd).
+-module(csd_web).
 -author('author <author@example.com>').
 -export([start/0, start_link/0, stop/0]).
 
@@ -23,22 +23,22 @@ start_link() ->
     application:set_env(webmachine, webmachine_logger_module, 
                         webmachine_logger),
     ensure_started(webmachine),
-    csd_sup:start_link().
+    csd_web_sup:start_link().
 
 %% @spec start() -> ok
-%% @doc Start the csd server.
+%% @doc Start the csd_web server.
 start() ->
     ensure_started(crypto),
     ensure_started(mochiweb),
     application:set_env(webmachine, webmachine_logger_module, 
                         webmachine_logger),
     ensure_started(webmachine),
-    application:start(csd).
+    application:start(csd_web).
 
 %% @spec stop() -> ok
-%% @doc Stop the csd server.
+%% @doc Stop the csd_web server.
 stop() ->
-    Res = application:stop(csd),
+    Res = application:stop(csd_web),
     application:stop(webmachine),
     application:stop(mochiweb),
     application:stop(crypto),

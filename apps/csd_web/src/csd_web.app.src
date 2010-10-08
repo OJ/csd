@@ -1,13 +1,14 @@
 %%-*- mode: erlang -*-
-{application, csd,
+{application, csd_web,
  [
-  {description, "csd"},
+  {description, "csd_web"},
   {vsn, "0.0.1"},
   {modules, [
-             csd,
-             csd_app,
-             csd_sup,
-             csd_resource,
+             csd_web,
+             csd_web_app,
+             csd_web_sup,
+             csd_web_resource,
+             csd_web_snippet_resource,
 
              % ErlyDTL templates
              snippet_dtl,
@@ -21,6 +22,6 @@
                   mochiweb,
                   webmachine
                  ]},
-  {mod, { csd_app, []}},
+  {mod, { csd_web_app, []}},
   {env, []}
  ]}.

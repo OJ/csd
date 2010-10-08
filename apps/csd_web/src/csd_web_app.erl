@@ -1,9 +1,9 @@
 %% @author author <author@example.com>
 %% @copyright YYYY author.
 
-%% @doc Callbacks for the csd application.
+%% @doc Callbacks for the csd_web application.
 
--module(csd_app).
+-module(csd_web_app).
 -author('author <author@example.com>').
 
 -behaviour(application).
@@ -11,11 +11,11 @@
 
 
 %% @spec start(_Type, _StartArgs) -> ServerRet
-%% @doc application start callback for csd.
+%% @doc application start callback for csd_web.
 start(_Type, _StartArgs) ->
-    csd_sup:start_link().
+    csd_web_sup:start_link().
 
 %% @spec stop(_State) -> ServerRet
-%% @doc application stop callback for csd.
+%% @doc application stop callback for csd_web.
 stop(_State) ->
     ok.

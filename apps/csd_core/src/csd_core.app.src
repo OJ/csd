@@ -1,0 +1,28 @@
+{application, csd_core,
+ [
+  {description, "Core functionality for Code Smackdown application"},
+  {vsn, "0.0.1"},
+  {registered, []},
+  {modules, [
+      csd_core,
+      csd_core_app,
+      csd_core_sup,
+      csd_core_svr,
+
+      % helper modules
+      csd_json,
+      csd_riak,
+
+      % data/domain modules
+      csd_snippet,
+
+      % riak connnection configuration
+      csd_riak_config
+    ]},
+  {applications, [
+                  kernel,
+                  stdlib
+                 ]},
+  {mod, { csd_core_app, []}},
+  {env, []}
+ ]}.
