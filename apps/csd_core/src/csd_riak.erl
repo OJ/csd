@@ -65,19 +65,9 @@ get_value(RiakObj) ->
 
 %% @spec save(pid(), riakc_obj()) -> {ok, riakc_obj()} | {error | Reason}
 %% @doc Saves the given riak object to the specified Riak node/cluster.
-%%      The riak client documentation states that 'put' can return both
-%%      "ok" or "{ok, riakc_obj()}", so this function removes the first
-%%      case to tidy up the interface for those who call this function
-%%      rather than just passing the result straight back to the caller.
 save(RiakPid, RiakObj) ->
-  case riakc_pb_socket:put(RiakPid, RiakObj) of
-    ok ->
-      {ok, RiakObj};
-    {ok, NewRiakObj} ->
-      {ok, NewRiakObj};
-    {error, Reason} ->
-      {error, Reason}
-  end.
+  Result = riakc_pb_socket:put(RiakPid, RiakObj),
+  Result.
 
 %% @spec new_key() -> key()
 %% @doc Generate an close-to-unique key that can be used to identify

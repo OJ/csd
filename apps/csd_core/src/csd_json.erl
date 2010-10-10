@@ -4,10 +4,12 @@
 
 %% ---------------- Exported Functions
 
+%% @spec to_json(proplist(), fun(atom) -> bool) -> json()
 %% @doc Convert a proplist into a mochijson2 encoded JSON blob.
 to_json(PropList, IsStrFun) ->
   mochijson2:encode(from_proplist(PropList, IsStrFun)).
 
+%% @spec to_json(json(), fun(atom) -> bool) -> proplist()
 %% @doc Convert mochijson2 encoded JSON blob back to a proplist.
 from_json(Json, IsStrFun) ->
   to_proplist(mochijson2:decode(Json), IsStrFun).
@@ -29,6 +31,8 @@ to_proplist({PropName, PropVal}, IsStrFun) ->
   PropAtom = list_to_atom(binary_to_list(PropName)),
   { PropAtom, from_value(PropAtom, PropVal, IsStrFun) }.
 
+to_value(PropName, L=[H|_], IsStrFun) when is_list(L) and is_list(H) ->
+  lists:map(fun(P) -> to_value(PropName, P, IsStrFun) end, L);
 to_value(PropName, L, IsStrFun) when is_list(L) ->
   case IsStrFun(PropName) of
     true -> list_to_binary(L);
@@ -37,6 +41,8 @@ to_value(PropName, L, IsStrFun) when is_list(L) ->
 to_value(_, V, _) ->
   V.
 
+from_value(PropName, L, IsStrFun) when is_list(L) ->
+  lists:map(fun(P) -> from_value(PropName, P, IsStrFun) end, L);
 from_value(PropName, B, IsStrFun) when is_binary(B) ->
   case IsStrFun(PropName) of
     true -> binary_to_list(B);
