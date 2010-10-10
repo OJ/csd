@@ -4,10 +4,10 @@
 %% @doc Callbacks for the csd_web application.
 
 -module(csd_web_app).
--author('author <author@example.com>').
+-author('OJ Reeves <oj@buffered.io>').
 
 -behaviour(application).
--export([start/2,stop/1]).
+-export([start/2, stop/1]).
 
 %% ----------------------------------------------- Exported Functions
 

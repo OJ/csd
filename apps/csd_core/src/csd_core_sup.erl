@@ -1,3 +1,8 @@
+%% @author OJ Reeves <oj@buffered.io>
+%% @copyright 2010 OJ Reeves
+
+%% @doc CSD core supervisor code.
+
 -module(csd_core_sup).
 
 -behaviour(supervisor).
@@ -26,10 +31,12 @@ upgrade() ->
   New = sets:from_list([Name || {Name, _, _, _, _, _} <- Specs]),
   Kill = sets:subtract(Old, New),
 
-  sets:fold(fun (Id, ok) ->
-    supervisor:terminate_child(?MODULE, Id),
-    supervisor:delete_child(?MODULE, Id),
-    ok end, ok, Kill),
+  sets:fold(
+    fun (Id, ok) ->
+      supervisor:terminate_child(?MODULE, Id),
+      supervisor:delete_child(?MODULE, Id),
+      ok end,
+    ok, Kill),
 
   [supervisor:start_child(?MODULE, Spec) || Spec <- Specs],
   ok.
@@ -40,7 +47,6 @@ upgrade() ->
 
 init([]) ->
   Server = ?CHILD(csd_core_svr, worker),
-  %Server = { csd_core_svr, { csd_core_svr, start_link, [] }, permanent, 5000, worker, dynamic },
   Processes = [Server],
-  { ok, { { one_for_one, 10, 10}, Processes } }.
+  {ok, {{one_for_one, 10, 10}, Processes}}.
 

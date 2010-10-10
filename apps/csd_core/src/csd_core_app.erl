@@ -1,13 +1,15 @@
+%% @author OJ Reeves <oj@buffered.io>
+%% @copyright 2010 OJ Reeves
+
+%% @doc csd_core application code.
+
 -module(csd_core_app).
 
 -behaviour(application).
 
-%% Application callbacks
 -export([start/2, stop/1]).
 
-%% ===================================================================
-%% Application callbacks
-%% ===================================================================
+%% ----------------------------------------------- Exported Functions
 
 start(_StartType, _StartArgs) ->
     csd_core_sup:start_link().

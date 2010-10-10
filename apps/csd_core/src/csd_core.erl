@@ -5,15 +5,10 @@
 
 -module(csd_core).
 -author('OJ Reeves <oj@buffered.io>').
+
 -export([start/0, start_link/0, stop/0]).
 
-ensure_started(App) ->
-  case application:start(App) of
-    ok ->
-      ok;
-    {error, {already_started, App}} ->
-      ok
-  end.
+%% ----------------------------------------------- Exported Functions
 
 %% @spec start_link() -> {ok,Pid::pid()}
 %% @doc Starts the app for inclusion in a supervisor tree
@@ -33,3 +28,14 @@ stop() ->
   Res = application:stop(csd_core),
   application:stop(crypto),
   Res.
+
+%% ----------------------------------------------- Internal Functions
+
+ensure_started(App) ->
+  case application:start(App) of
+    ok ->
+      ok;
+    {error, {already_started, App}} ->
+      ok
+  end.
+

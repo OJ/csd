@@ -22,7 +22,7 @@ connect({IP, Port}) ->
   {ok, RiakPid} = riakc_pb_socket:start_link(IP, Port),
   RiakPid.
 
-%% @spec create(binary, binary, json) -> riakc object
+%% @spec create(binary, binary, json) -> riakc_obj()
 %% @doc Create a new instance of a riak object using the
 %%      parameters given. The riak object can then be
 %%      persisted to a Riak node/cluster. This overload
@@ -31,30 +31,67 @@ connect({IP, Port}) ->
 create(Bucket, Key, JsonData) ->
   create(Bucket, Key, JsonData, "application/json").
 
+%% @spec create(binary, binary, term(), string) -> riakc_obj()
+%% @doc Create a new instance of a riak object using the
+%%      parameters given. The riak object can then be
+%%      persisted to a Riak node/cluster. This overload
+%%      takes arbitrary data and requires the user to
+%%      specify the mime type of the data that is being
+%%      stored.
 create(Bucket, Key, Item, MimeType) ->
   RiakObj = riakc_obj:new(Bucket, Key, Item, MimeType),
   RiakObj.
 
+%% @spec fetch(pid(), binary, binary) -> riakc_obj()
+%% @doc Fetches a riakc object from a Riak node/cluster
+%%      using the connection given.
 fetch(RiakPid, Bucket, Key) ->
   RiakObj = riakc_pb_socket:get(RiakPid, Bucket, Key),
   RiakObj.
 
+%% @spec update(riakc_obj(), term()) -> riakc_obj()
+%% @doc Updates the stored value for a riakc object with
+%%      the new one specified.
 update(RiakObj, NewValue) ->
   NewRiakObj = riakc_obj:update_value(RiakObj, NewValue),
   NewRiakObj.
 
+%% @spec get_value(riakc_obj()) -> term()
+%% @doc Retrieves the stored value from within the riakc
+%%      object.
 get_value(RiakObj) ->
   Value = riakc_obj:get_value(RiakObj),
   Value.
 
+%% @spec save(pid(), riakc_obj()) -> {ok, riakc_obj()} | {error | Reason}
+%% @doc Saves the given riak object to the specified Riak node/cluster.
+%%      The riak client documentation states that 'put' can return both
+%%      "ok" or "{ok, riakc_obj()}", so this function removes the first
+%%      case to tidy up the interface for those who call this function
+%%      rather than just passing the result straight back to the caller.
 save(RiakPid, RiakObj) ->
-  riakc_pb_socket:put(RiakPid, RiakObj).
+  case riakc_pb_socket:put(RiakPid, RiakObj) of
+    ok ->
+      {ok, RiakObj};
+    {ok, NewRiakObj} ->
+      {ok, NewRiakObj};
+    {error, Reason} ->
+      {error, Reason}
+  end.
 
+%% @spec new_key() -> key()
+%% @doc Generate an close-to-unique key that can be used to identify
+%%      an object in riak. This implementation is blatantly borrowed
+%%      (purloined) from the wriaki source (thanks basho!)
 new_key() ->
   {{Yr, Mo, Dy}, {Hr, Mn, Sc}} = erlang:universaltime(),
   {_, _, Now} = now(),
   new_key([Yr, Mo, Dy, Hr, Mn, Sc, node(), Now]).
 
+%% @spec new_key(list()) -> key()
+%% @doc Generate an close-to-unique key that can be used to identify
+%%      an object in riak using the given list parameter as the stuff
+%%      to hash.
 new_key(List) ->
   Hash = erlang:phash2(List),
   base64:encode(<<Hash:32>>).
