@@ -3,21 +3,7 @@
   [
     {description, "The Webmachine component of the Code Smackdown application."},
     {vsn, "0.0.1"},
-    {modules,
-      [
-        csd_web,
-        csd_web_app,
-        csd_web_sup,
-
-        % Webmachine resources
-        csd_web_resource,
-        csd_web_snippet_resource,
-
-        % ErlyDTL templates
-        snippet_dtl,
-        sample_dtl
-      ]
-    },
+    {modules, []},
     {registered, []},
     {applications,
       [
