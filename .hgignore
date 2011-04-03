@@ -1,0 +1,11 @@
+\.beam
+^rebar$
+.~
+\.orig
+\.swp
+rt.work/*
+priv\/log\/.*
+\.eunit.*
+deps\/.*
+\.dump
+ebin\/.*.app

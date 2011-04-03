@@ -1,0 +1,18 @@
+%%-*- mode: erlang -*-
+{application, csd,
+ [
+  {description, "csd"},
+  {vsn, "1"},
+  {modules, []},
+  {registered, []},
+  {applications, [
+                  kernel,
+                  stdlib,
+                  inets,
+                  crypto,
+                  mochiweb,
+                  webmachine
+                 ]},
+  {mod, { csd_app, []}},
+  {env, []}
+ ]}.
