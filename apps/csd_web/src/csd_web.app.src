@@ -1,0 +1,20 @@
+%%-*- mode: erlang -*-
+{application, csd_web,
+  [
+    {description, "The Webmachine component of the Code Smackdown application."},
+    {vsn, "0.0.1"},
+    {modules, []},
+    {registered, []},
+    {applications,
+      [
+        kernel,
+        stdlib,
+        inets,
+        crypto,
+        mochiweb,
+        webmachine
+      ]
+    },
+    {mod, {csd_web_app, []}},
+    {env, []}
+  ]}.

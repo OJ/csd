@@ -1,9 +1,9 @@
 %% @author author <author@example.com>
 %% @copyright YYYY author.
 
-%% @doc Supervisor for the csd application.
+%% @doc Supervisor for the csd_web application.
 
--module(csd_sup).
+-module(csd_web_sup).
 -author('author <author@example.com>').
 
 -behaviour(supervisor).

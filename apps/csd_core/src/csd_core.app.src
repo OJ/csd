@@ -1,0 +1,15 @@
+{application, csd_core,
+  [
+    {description, "Core functionality for the Code Smackdown application."},
+    {vsn, "0.0.1"},
+    {registered, []},
+    {applications,
+      [
+        kernel,
+        stdlib
+      ]
+    },
+    {mod, {csd_core_app, []}},
+    {env, []}
+  ]
+}.
