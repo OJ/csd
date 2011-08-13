@@ -19,9 +19,13 @@ from_json(SnippetJson) ->
   from_json_internal(SnippetJson).
 
 fetch(RiakPid, Key) ->
-  {ok, RiakObj} = csd_riak:fetch(RiakPid, ?BUCKET, Key),
-  SnippetJson = csd_riak:get_value(RiakObj),
-  from_json_internal(SnippetJson).
+  case csd_riak:fetch(RiakPid, ?BUCKET, Key) of
+    {ok, RiakObj} ->
+      SnippetJson = csd_riak:get_value(RiakObj),
+      {ok, from_json_internal(SnippetJson)};
+    {error, Reason} ->
+      {error, Reason}
+  end.
 
 save(RiakPid, Snippet={snippet, SnippetData}) ->
   case proplists:get_value(key, SnippetData, undefined) of
@@ -32,10 +36,16 @@ save(RiakPid, Snippet={snippet, SnippetData}) ->
       ok = csd_riak:save(RiakPid, RiakObj),
       {snippet, NewSnippetData};
     ExistingKey ->
-      RiakObj = csd_riak:fetch(RiakPid, ?BUCKET, ExistingKey),
-      NewRiakObj = csd_riak:update(RiakObj, to_json_internal(SnippetData)),
-      ok = csd_riak:save(RiakPid, NewRiakObj),
-      Snippet
+      case csd_riak:fetch(RiakPid, ?BUCKET, ExistingKey) of
+        {ok, RiakObj} ->
+          NewRiakObj = csd_riak:update(RiakObj, to_json_internal(SnippetData)),
+          ok = csd_riak:save(RiakPid, NewRiakObj),
+          Snippet;
+        {error, notfound} ->
+          RiakObj = csd_riak:create(?BUCKET, ExistingKey, to_json_internal(SnippetData)),
+          ok = csd_riak:save(RiakPid, RiakObj),
+          {snippet, SnippetData}
+      end
   end.
 
 to_json_internal(SnippetData) ->

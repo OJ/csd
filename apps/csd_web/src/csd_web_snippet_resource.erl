@@ -14,7 +14,7 @@ init([]) -> {ok, undefined}.
 to_html(ReqData, State) ->
   PathInfo = wrq:path_info(ReqData),
   {ok, SnippetKey} = dict:find(key, PathInfo),
-  {snippet, SnippetData} = csd_core_server:get_snippet(list_to_binary(SnippetKey)),
+  {ok, {snippet, SnippetData}} = csd_core_server:get_snippet(list_to_binary(SnippetKey)),
   {ok, Content} = snippet_dtl:render(SnippetData),
   {Content, ReqData, State}.
 
