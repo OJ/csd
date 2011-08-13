@@ -31,6 +31,7 @@ start() ->
 %% @doc Stop the csd_core server.
 stop() ->
     Res = application:stop(csd_core),
+    application:stop(pooler),
     application:stop(crypto),
     Res.
 
