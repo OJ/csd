@@ -19,8 +19,7 @@
 %% ------------------------------------------------------------------
 
 start_link() ->
-  ConnInfo = csd_riak_config:connection_info(),
-  gen_server:start_link({local, ?SERVER}, ?MODULE, [ConnInfo], []).
+  gen_server:start_link({local, ?SERVER}, ?MODULE, [], []).
 
 save_snippet(Snippet) ->
   gen_server:call(?SERVER, {save_snippet, Snippet}, infinity).
@@ -32,18 +31,16 @@ get_snippet(SnippetKey) ->
 %% gen_server Function Definitions
 %% ------------------------------------------------------------------
 
-init([ConnInfo]) ->
-  {ok, ConnInfo}.
+init([]) ->
+  {ok, undefined}.
 
-handle_call({save_snippet, Snippet}, _From, ConnInfo) ->
-  RiakPid = csd_riak:connect(ConnInfo),
-  SavedSnippet = csd_snippet:save(RiakPid, Snippet),
-  {reply, SavedSnippet, ConnInfo};
+handle_call({save_snippet, Snippet}, _From, State) ->
+  SavedSnippet = pooler:use_member(fun(RiakPid) -> csd_snippet:save(RiakPid, Snippet) end),
+  {reply, SavedSnippet, State};
 
-handle_call({get_snippet, SnippetKey}, _From, ConnInfo) ->
-  RiakPid = csd_riak:connect(ConnInfo),
-  Snippet = csd_snippet:fetch(RiakPid, SnippetKey),
-  {reply, Snippet, ConnInfo};
+handle_call({get_snippet, SnippetKey}, _From, State) ->
+  Snippet = pooler:use_member(fun(RiakPid) -> csd_snippet:fetch(RiakPid, SnippetKey) end),
+  {reply, Snippet, State};
 
 handle_call(_Request, _From, State) ->
   {noreply, ok, State}.
@@ -59,8 +56,4 @@ terminate(_Reason, _State) ->
 
 code_change(_OldVsn, State, _Extra) ->
   {ok, State}.
-
-%% ------------------------------------------------------------------
-%% Internal Function Definitions
-%% ------------------------------------------------------------------
 
