@@ -1,25 +1,30 @@
-ERL ?= erl
-APP = csd
-
 .PHONY: deps
 
-all: deps
-	@./rebar compile
+REBAR=`which rebar || ./rebar`
+
+all: deps compile
+
+compile:
+	@$(REBAR) compile
 
 app:
-	@./rebar compile skip_deps=true
+	@$(REBAR) compile skip_deps=true
 
 deps:
-	@./rebar get-deps
+	@$(REBAR) get-deps
 
 clean:
-	@./rebar clean
+	@$(REBAR) clean
 
 distclean: clean
-	@./rebar delete-deps
+	@$(REBAR) delete-deps
+
+test: app
+	@$(REBAR) eunit skip_deps=true
 
 webstart: app
 	exec erl -pa $(PWD)/apps/*/ebin -pa $(PWD)/deps/*/ebin -boot start_sasl -config $(PWD)/apps/csd_core/priv/app.config -s reloader -s csd_core -s csd_web
 
 proxystart:
 	@haproxy -f dev.haproxy.conf
+

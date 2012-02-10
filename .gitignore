@@ -1,0 +1,11 @@
+*.beam
+*~
+*.orig
+*.swp
+priv/log/*
+.eunit/*
+apps/*/.eunit/*
+deps
+*.dump
+ebin
+apps/*/ebin
