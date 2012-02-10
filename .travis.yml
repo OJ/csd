@@ -1,0 +1,6 @@
+language: erlang
+notifications:
+  recipients:
+    - oj@buffered.io
+otp_release:
+  - R15B
