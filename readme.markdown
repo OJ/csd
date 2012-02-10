@@ -7,6 +7,10 @@ The code is still in active development, as is the post series that accompanies 
 
 Feel free to ping me via [@TheColonial][tc] if you have can comments or suggestions.
 
+---
+
+<a rel="license" href="http://creativecommons.org/licenses/by-sa/3.0/"><img style="float:left;margin-right:5px;" alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by-sa/3.0/88x31.png" /></a><span xmlns:dct="http://purl.org/dc/terms/" href="http://purl.org/dc/dcmitype/Text" property="dct:title" rel="dct:type">Code Smackdown</span> by <a xmlns:cc="http://creativecommons.org/ns#" href="http://buffered.io/series/web-development-with-erlang" property="cc:attributionName" rel="cc:attributionURL">OJ Reeves</a> is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-sa/3.0/">Creative Commons Attribution-ShareAlike 3.0 Unported License</a>. Based on a work at <a xmlns:dct="http://purl.org/dc/terms/" href="https://github.com/OJ/csd" rel="dct:source">github.com</a>.
+
 [Erlang]: http://www.erlang.org/
 [Webmachine]: http://webmachine.basho.com/
 [ErlyDTL]: https://github.com/evanmiller/erlydtl
