@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Code Smackdown - {% block page_title %}{% endblock %}</title>
+         
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js" type="text/javascript"></script>
+    <script src="http://ajax.microsoft.com/ajax/jquery.templates/beta1/jquery.tmpl.min.js" type="text/javascript"></script>
+  </head>
+  <body>
+    {% block body_content %}{% endblock %}
+  </body>
+</html>

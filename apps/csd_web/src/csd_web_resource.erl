@@ -7,6 +7,11 @@ init([]) ->
   {ok, undefined}.
 
 to_html(ReqData, State) ->
-  {ok, Content} = sample_dtl:render([{param, "Slartibartfast"}]),
+  Content = case cookie:load_auth(ReqData) of
+    {ok, {_, Name, _, _}} ->
+      csd_view:home(Name);
+    _ ->
+      csd_view:home()
+  end,
   {Content, ReqData, State}.
 

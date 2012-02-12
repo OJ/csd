@@ -23,7 +23,7 @@ test: app
 	@$(REBAR) eunit skip_deps=true
 
 webstart: app
-	exec erl -pa $(PWD)/apps/*/ebin -pa $(PWD)/deps/*/ebin -boot start_sasl -config $(PWD)/apps/csd_core/priv/app.config -s reloader -s csd_core -s csd_web
+	exec erl -pa $(PWD)/apps/*/ebin -pa $(PWD)/deps/*/ebin -boot start_sasl -config $(PWD)/apps/csd_web/priv/app.config -config $(PWD)/apps/csd_core/priv/app.config -s reloader -s csd_core -s csd_web
 
 proxystart:
 	@haproxy -f dev.haproxy.conf
