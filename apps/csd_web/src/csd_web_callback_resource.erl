@@ -25,7 +25,6 @@ to_html(ReqData, State) ->
   {"<html>Something went wrong!</html>", ReqData, State}.
 
 handle_callback(ReqData, State) ->
-  io:format("Handling callback request~n", []),
   ReqToken = wrq:get_qs_value("oauth_token", ReqData),
   ReqTokenSecret = wrq:get_qs_value("oauth_token_secret", ReqData),
   Verifier = wrq:get_qs_value("oauth_verifier", ReqData),
@@ -35,7 +34,6 @@ handle_callback(ReqData, State) ->
   {struct, Json} = mochijson2:decode(UserInfoJson),
   UserId = proplists:get_value(<<"id">>, Json),
   UserName = proplists:get_value(<<"screen_name">>, Json),
-  io:format("User Id: ~p~nUser Name: ~p~n", [UserId, UserName]),
   NewReqData = cookie:store_auth(ReqData, UserId, UserName, AccessToken, AccessTokenSecret),
 
   % TODO: store the 'session' in Riak in an ETS backend

@@ -15,7 +15,6 @@ request_access() ->
   RequestToken = oauth:token(RequestParams),
   io:format("Request Token: ~p~n", [RequestToken]),
   AuthenticateUrl = proplists:get_value(authenticate_url, TwitterConf),
-  CallbackUrl = proplists:get_value(callback_url, TwitterConf),
   {ok, oauth:uri(AuthenticateUrl, [{"oauth_token", RequestToken}])}.
 
 verify_access(RequestToken, RequestTokenSecret, Verifier) ->
@@ -31,13 +30,13 @@ verify_access(RequestToken, RequestTokenSecret, Verifier) ->
 get_current_user_info(AccessToken, AccessTokenSecret) ->
   call_json_service(current_user_info_url, AccessToken, AccessTokenSecret).
 
-% Extract a oauth-formatted consumer tuple from the given Twitter configuration.
+%% Extract a oauth-formatted consumer tuple from the given Twitter configuration.
 consumer(TwitterConf) ->
   ConsumerKey = proplists:get_value(consumer_key, TwitterConf),
   ConsumerSecret = proplists:get_value(consumer_secret, TwitterConf),
   {ConsumerKey, ConsumerSecret, hmac_sha1}.
 
-% Invoke a call to a JSON service on Twitter.
+%% Invoke a call to a JSON service on Twitter.
 call_json_service(UrlKey, AccessToken, AccessTokenSecret) ->
   TwitterConf = conf:get_section(twitter),
   Url = proplists:get_value(UrlKey, TwitterConf),

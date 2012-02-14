@@ -1,9 +1,0 @@
-{% extends 'base.dtl' %}
-
-{% block page_title %}Logon{% endblock %}
-
-{% block body_content %}
-    <h1>Logon</h1>
-    <p>We require you to sign in via Twitter</p>
-    <p><a href="{{ request_url }}" title="Sign in with Twitter"><img src="http://si0.twimg.com/images/dev/buttons/sign-in-with-twitter-d.png"/></a><p>
-{% endblock %}

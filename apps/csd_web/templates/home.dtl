@@ -7,7 +7,8 @@
     {% if logged_in %}
     <p>Welcome back {{ user_name }}.</p>
     {% else %}
-    <p>Sorry, we don't know you, please <a href="{{ logon_url }}">sign in</a>.</p>
+    <p>We require you to sign in via Twitter</p>
+    <p><a href="{{ logon_url }}" title="Sign in with Twitter"><img src="http://si0.twimg.com/images/dev/buttons/sign-in-with-twitter-d.png"/></a><p>
     {% endif %}
 {% endblock %}
 
