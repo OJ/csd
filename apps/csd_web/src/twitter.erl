@@ -13,14 +13,12 @@ request_access() ->
   {ok, RequestResponse} = oauth:get(RequestTokenUrl, [], consumer(TwitterConf)),
   RequestParams = oauth:params_decode(RequestResponse),
   RequestToken = oauth:token(RequestParams),
-  io:format("Request Token: ~p~n", [RequestToken]),
   AuthenticateUrl = proplists:get_value(authenticate_url, TwitterConf),
   {ok, oauth:uri(AuthenticateUrl, [{"oauth_token", RequestToken}])}.
 
 verify_access(RequestToken, RequestTokenSecret, Verifier) ->
   TwitterConf = conf:get_section(twitter),
   AccessTokenUrl = proplists:get_value(access_token_url, TwitterConf),
-  io:format("Access URL: ~p~n", [AccessTokenUrl]),
   {ok, AccessResponse} = oauth:get(AccessTokenUrl, [{"oauth_verifier", Verifier}], consumer(TwitterConf), RequestToken, RequestTokenSecret),
   AccessParams = oauth:params_decode(AccessResponse),
   AccessToken = oauth:token(AccessParams),

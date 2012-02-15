@@ -5,7 +5,7 @@
 
 -author('OJ Reeves <oj@buffered.io>').
 
--export([init/1, to_html/2, resource_exists/2, previously_existed/2, moved_temporarily/2]).
+-export([init/1, resource_exists/2, previously_existed/2, moved_temporarily/2]).
 
 -include_lib("webmachine/include/webmachine.hrl").
 
@@ -20,9 +20,6 @@ previously_existed(ReqData, State) ->
 
 moved_temporarily(ReqData, State) ->
   handle_callback(ReqData, State).
-
-to_html(ReqData, State) ->
-  {"<html>Something went wrong!</html>", ReqData, State}.
 
 handle_callback(ReqData, State) ->
   ReqToken = wrq:get_qs_value("oauth_token", ReqData),
