@@ -8,8 +8,8 @@ init([]) ->
 
 to_html(ReqData, State) ->
   Content = case cookie:load_auth(ReqData) of
-    {ok, {_, Name, _, _}} ->
-      csd_view:home(Name);
+    {ok, {UserId, _, _, _}} ->
+      csd_view:home(UserId);
     _ ->
       csd_view:home()
   end,

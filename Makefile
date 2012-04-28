@@ -25,6 +25,11 @@ test: app
 webstart: app
 	exec erl -pa $(PWD)/apps/*/ebin -pa $(PWD)/deps/*/ebin -boot start_sasl -config $(PWD)/apps/csd_web/priv/app.config -config $(PWD)/apps/csd_core/priv/app.config -s reloader -s csd_core -s csd_web
 
-proxystart:
-	@haproxy -f dev.haproxy.conf
+haproxystart:
+	@haproxy -f $(PWD)/priv/dev.haproxy.conf
 
+nginxstart:
+	@nginx -c $(PWD)/priv/dev.nginx.conf
+
+nginxstop:
+	@nginx -s stop

@@ -1,0 +1,25 @@
+{% extends 'base.dtl' %}
+
+{% block page_title %}Submit snippet{% endblock %}
+
+{% block body_content %}
+<h1>Submit new snippet</h1>
+<div>
+  <form action="{{ post_url }}" method="POST">
+    <div class="field">
+      <label for="title">Title:</label>
+      <input name="title" type="text" />
+    </div>
+    <div class="snippet-left">
+      <textarea name="left" cols="40" rows="10"></textarea>
+    </div>
+    <div class="snippet-right">
+      <textarea name="right" cols="40" rows="10"></textarea>
+    </div>
+    <div class="field">
+      <input type="submit" name="Submit" />
+    </div>
+  </form>
+</div>
+{% endblock %}
+

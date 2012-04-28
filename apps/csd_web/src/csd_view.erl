@@ -12,7 +12,8 @@ home() ->
   {ok, Content} = home_dtl:render(Params),
   Content.
 
-home(Name) ->
-  Params = [{logged_in, true}, {user_name, Name}],
+home(UserId) ->
+  Params = [{logged_in, true}, {user_id, UserId}],
   {ok, Content} = home_dtl:render(Params),
   Content.
+

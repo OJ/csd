@@ -2,11 +2,85 @@
 <html lang="en">
   <head>
     <title>Code Smackdown - {% block page_title %}{% endblock %}</title>
-         
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js" type="text/javascript"></script>
-    <script src="http://ajax.microsoft.com/ajax/jquery.templates/beta1/jquery.tmpl.min.js" type="text/javascript"></script>
+
+    <script src="/static/js/jquery.min.js" type="text/javascript"></script>
+    <script src="/static/js/bootstrap.min.js"></script>
+    <script src="/static/js/underscore.min.js" type="text/javascript"></script>
+    <script src="/static/js/backbone.min.js" type="text/javascript"></script>
+    <script src="/static/js/handlebars.js" type="text/javascript"></script>
+    <script src="/static/js/csd.js" type="text/javascript"></script>
+
+    <script id="new-snippet-tmpl" type="text/x-handlebars-template">
+      <h1>Submit new snippet</h1>
+      <div>
+        <form action="{% templatetag openvariable %} post_url {% templatetag closevariable %}" method="POST">
+          <div class="field">
+            <label for="title">Title:</label>
+            <input name="title" type="text" />
+          </div>
+          <div class="snippet-left">
+            <textarea name="left" cols="40" rows="10"></textarea>
+          </div>
+          <div class="snippet-right">
+            <textarea name="right" cols="40" rows="10"></textarea>
+          </div>
+          <div class="field">
+            <a href="#" class="submit">Submit</a>
+          </div>
+        </form>
+      </div>
+    </script>
+
+    <script id="snippet-tmpl" type="text/x-handlebars-template">
+      <h1>{% templatetag openvariable %} title {% templatetag closevariable %}</h1>
+      <div>
+        <div class="snippet-left">
+          <p>Left:</p>
+          <pre>
+{% templatetag openvariable %}{% templatetag openbrace %} left {% templatetag closebrace %}{% templatetag closevariable %}
+          </pre>
+        </div>
+        <div class="snippet-right">
+          <p>Right:</p>
+          <pre>
+{% templatetag openvariable %}{% templatetag openbrace %} right {% templatetag closebrace %}{% templatetag closevariable %}
+          </pre>
+        </div>
+      </div>
+    </script>
+
+    {% if logged_in %}
+    <script id="user-tmpl" type="text/x-handlebars-template">
+    <h1>Welcome to Code Smackdown</h1>
+    <p>{% templatetag openvariable %} user_name {% templatetag closevariable %}.</p>
+    <p><a href="#new-snippet">Create a new snippet</a></p>
+    <p>Submitted Snippets:
+      <ul>
+        {% templatetag openvariable %}#each snippets{% templatetag closevariable %}
+        <li><a href="#snippet/{% templatetag openvariable %} this.key {% templatetag closevariable %}">{% templatetag openvariable %} this.title {% templatetag closevariable %}</a>
+        {% templatetag openvariable %}/each{% templatetag closevariable %}
+      </ul>
+    </p>
+    </script>
+    {% else %}
+    <script id="logon-tmpl" type="text/x-handlebars-template">
+    <h1>Welcome to Code Smackdown</h1>
+    <p>We require you to sign in via Twitter</p>
+    <p><a href="{{ logon_url }}" title="Sign in with Twitter">
+      <img src="http://si0.twimg.com/images/dev/buttons/sign-in-with-twitter-d.png"/></a><p>
+    </script>
+    {% endif %}
+
+    <script type="text/javascript">
+      $(document).ready(function() {
+        var router = new window.CsdRouter();
+        router.start({% block user_id %}{% endblock %});
+      });
+    </script>
   </head>
   <body>
+    <div id="content">
     {% block body_content %}{% endblock %}
+    </div>
   </body>
 </html>

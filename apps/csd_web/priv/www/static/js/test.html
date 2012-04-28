@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <script src="jquery.min.js" type="text/javascript"></script>
+    <script src="underscore.min.js" type="text/javascript"></script>
+    <script src="backbone.min.js" type="text/javascript"></script>
+    <script src="handlebars.js" type="text/javascript"></script>
+    <script src="csd.js" type="text/javascript"></script>
+
+    <script id="new-snippet-tmpl" type="text/x-handlebars-template">
+      <h1>Submit new snippet</h1>
+      <div>
+        <form action="{{ post_url }}" method="POST">
+          <div class="field">
+            <label for="title">Title:</label>
+            <input name="title" type="text" />
+          </div>
+          <div class="snippet-left">
+            <textarea name="left" cols="40" rows="10"></textarea>
+          </div>
+          <div class="snippet-right">
+            <textarea name="right" cols="40" rows="10"></textarea>
+          </div>
+          <div class="field">
+            <a href="#" class="submit">Save</a>
+          </div>
+        </form>
+      </div>
+    </script>
+
+    <script id="snippet-tmpl" type="text/x-handlebars-template">
+      <h1>{{ title }}</h1>
+      <div>
+        <div class="snippet-left">
+          <p>Left:</p>
+          <pre>
+{{{ left }}}
+          </pre>
+        </div>
+        <div class="snippet-right">
+          <p>Right:</p>
+          <pre>
+{{{ right }}}
+          </pre>
+        </div>
+      </div>
+    </script>
+
+  </head>
+  <body>
+    <div id="content">
+      <a href="#new-snippet">New</a>
+      <a href="#snippet/10">Get</a>
+    </div>
+  </body>
+</html>
