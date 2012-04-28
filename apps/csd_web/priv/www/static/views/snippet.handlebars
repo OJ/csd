@@ -1,18 +1,62 @@
 <header class="subhead">
-  <h1>{{title}}</h1>
+    <h1>Take your pick <small>...</small></h1>
 </header>
 <section>
   <div class="page-header">
-    <h1>Take your pick <small>...</small></h1>
+  <h1>{{title}}</h1>
   </div>
   <div class="row">
     <div class="span6">
       <h2>This one?</h2>
+    </div>
+    <div class="span6">
+      <h2 class="pull-right">Or this one?</h2>
+    </div>
+  </div>
+  <div class="row">
+    <div class="span6">
       <pre class="prettyprint linenums">{{{left}}}</pre>
     </div>
     <div class="span6">
-      <h2>Or this one?</h2>
       <pre class="prettyprint linenums">{{{right}}}</pre>
+    </div>
+  </div>
+  <div class="row">
+    <div class="span6">
+      <div class="progress progress-success progress-striped">
+        <div class="bar pull-right" style="width: 60%;"></div>
+      </div>
+    </div>
+    <div class="span6">
+      <div class="progress progress-danger progress-striped">
+        <div class="bar" style="width: 40%;"></div>
+      </div>
+    </div>
+  </div>
+  <div class="row">
+    <div class="span6 centered">
+      Votes: <span class="badge badge-success">12</span>
+    </div>
+    <div class="span6 centered">
+      Votes: <span class="badge badge-important">8</span>
+    </div>
+  </div>
+  <div class="row vote-buttons">
+    <div class="span6">
+      <a class="btn btn-large btn-primary pull-right vote-left" data-key="{{key}}" href="#"><i class="icon-arrow-up icon-white"></i> This one rules.</a>
+    </div>
+    <div class="span6 pull-left">
+      <a class="btn btn-large btn-primary vote-right" data-key="{{key}}" href="#">No, this one does! <i class="icon-arrow-up icon-white"></i></a>
+    </div>
+  </div>
+  <div class="row vote-complete">
+    <div class="span4">&nbsp;
+    </div>
+    <div class="span4 centered">
+      <div class="alert alert-success">
+        <button class="close" data-dismiss="alert">&times;</button>
+        <strong>Thanks!</strong> Your vote has been submitted.
+      </div>
     </div>
   </div>
 </section>

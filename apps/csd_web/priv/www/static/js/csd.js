@@ -37,16 +37,43 @@
       return {
         left: $.trim(this.get('left')),
         right: $.trim(this.get('right')),
-        title: $.trim(this.get('title'))
+        title: $.trim(this.get('title')),
+        key: this.get('key')
       };
     }
   });
 
   var SnippetView = Backbone.View.extend({
+    events: {
+      'click a.vote-left': 'voteLeft',
+      'click a.vote-right': 'voteRight'
+    },
+
     render: function() {
       var html = router.renderTemplate('snippet', this.model.toJSON());
       $(this.el).html(html);
       return this.el;
+    },
+
+    voteLeft: function(e) {
+      this.vote('left', e);
+    },
+
+    voteRight: function(e) {
+      this.vote('right', e);
+    },
+
+    vote: function(which, e) {
+      var self = this;
+      e.preventDefault();
+      var postData = {
+        key: $(e).data('key'),
+        which: which
+      };
+      //$.post("/vote", postData, function(result) {
+        self.$('.vote-buttons').hide();
+        self.$('.vote-complete').show();
+      //}, 'json');
     }
   });
 
@@ -100,15 +127,22 @@
       '': 'home'
     },
 
-    setView: function(view) {
+    setView: function(view, title) {
       var html = view.render();
       $('#content').html(html);
+
+      var newTitle = "CodeSmackdown"
+      if(!!title && title.length > 0) {
+        newTitle += " - " + title;
+      }
+      document.title = newTitle;
+
       window.prettyPrint && prettyPrint();
     },
 
     login: function() {
       var view = new LoginView();
-      this.setView(view);
+      this.setView(view, "Login");
     },
 
     home: function() {
@@ -125,12 +159,12 @@
         user.is_current = self.currentUserId == id;
         var model = new UserModel(user);
         var view = new UserView({model: model});
-        self.setView(view);
+        self.setView(view, model.get('user_name'));
       });
     },
 
     newSnippet: function() {
-      this.setView(new NewSnippetView());
+      this.setView(new NewSnippetView(), 'New snippet');
     },
 
     getSnippet: function(id) {
@@ -138,7 +172,7 @@
       $.getJSON('/snippet/' + id, function(snippet) {
         var model = new SnippetModel(snippet);
         var view = new SnippetView({model: model});
-        self.setView(view);
+        self.setView(view, model.get('title'));
       });
     },
 

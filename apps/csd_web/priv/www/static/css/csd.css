@@ -19,3 +19,11 @@ textarea.snippet {
 .centered {
   text-align: center;
 }
+
+.vote-buttons {
+  padding-top: 15px;
+}
+.vote-complete {
+  padding-top: 15px;
+  display: none;
+}
