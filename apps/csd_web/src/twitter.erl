@@ -10,12 +10,7 @@
 request_access() ->
   TwitterConf = conf:get_section(twitter),
   RequestTokenUrl = proplists:get_value(request_token_url, TwitterConf),
-  io:format("~p~n", [RequestTokenUrl]),
-  Foo = oauth:get(RequestTokenUrl, [], consumer(TwitterConf)),
-  io:format("~p~n", [Foo]),
-  {ok, RequestResponse} = Foo,
-  %{ok, RequestResponse} = oauth:get(RequestTokenUrl, [], consumer(TwitterConf)),
-  %io:format("~p~n", [RequestResponse]),
+  {ok, RequestResponse} = oauth:get(RequestTokenUrl, [], consumer(TwitterConf)),
   RequestParams = oauth:params_decode(RequestResponse),
   io:format("got here~n", []),
   RequestToken = oauth:token(RequestParams),

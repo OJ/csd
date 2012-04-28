@@ -6,3 +6,16 @@ body {
   font-size: 50px;
   padding-bottom: 10px;
 }
+
+input.title {
+  width: 100%;
+}
+
+textarea.snippet {
+  width: 100%;
+  font-family: Consolas, Lucidia Console, DejaVu Sans Mono, Courier;
+}
+
+.centered {
+  text-align: center;
+}

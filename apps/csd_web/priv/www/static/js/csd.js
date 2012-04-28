@@ -23,9 +23,9 @@
 
     serialize: function() {
       return {
-        title: this.$('input[name="title"]').val(),
-        left: this.$('textarea[name="left"]').val(),
-        right: this.$('textarea[name="right"]').val()
+        title: $.trim(this.$('input[name="title"]').val()),
+        left: $.trim(this.$('textarea[name="left"]').val()),
+        right: $.trim(this.$('textarea[name="right"]').val())
       };
     }
   });
@@ -35,9 +35,9 @@
   var SnippetModel = Backbone.Model.extend({
     toJSON: function() {
       return {
-        left: this.get('left'),
-        right: this.get('right'),
-        title: this.get('title')
+        left: $.trim(this.get('left')),
+        right: $.trim(this.get('right')),
+        title: $.trim(this.get('title'))
       };
     }
   });
@@ -93,29 +93,29 @@
 
   window.CsdRouter = Backbone.Router.extend({
     routes: {
-      '': 'home',
       'login': 'login',
       'user/:id': 'userHome',
       'new-snippet': 'newSnippet',
-      'snippet/:id': 'getSnippet'
+      'snippet/:id': 'getSnippet',
+      '': 'home'
     },
 
     setView: function(view) {
       var html = view.render();
       $('#content').html(html);
+      window.prettyPrint && prettyPrint();
     },
 
     login: function() {
       var view = new LoginView();
-      console.log(view);
       this.setView(view);
     },
 
     home: function() {
       if(!!this.currentUserId) {
-        this.userHome(this.currentUserId);
+        this.navigate('user/' + this.currentUserId, {trigger: true, replace: true});
       } else {
-        this.login();
+        this.navigate('login', {trigger: true, replace: true});
       }
     },
 
@@ -169,10 +169,13 @@
 
       Backbone.history.start();
 
-      if(!userId) {
-        this.navigate('login', {trigger: true, replace: true});
-      } else {
-        this.navigate('user/' + userId, {trigger: true, replace: true});
+      var hash = window.location.hash;
+      if(hash === '' || hash === '#') {
+        if(!userId) {
+          this.navigate('login', {trigger: true, replace: true});
+        } else {
+          this.navigate('user/' + userId, {trigger: true, replace: true});
+        }
       }
     }
   });

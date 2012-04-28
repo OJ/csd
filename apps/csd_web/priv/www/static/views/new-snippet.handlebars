@@ -1,18 +1,31 @@
-<h1>Submit new snippet</h1>
-<div>
-  <form action="{{ post_url }}" method="POST">
-    <div class="field">
-      <label for="title">Title:</label>
-      <input name="title" type="text" />
+<header class="subhead">
+  <h1>Submit new snippet</h1>
+</header>
+<section>
+  <div class="page-header">
+    <h1>Two snippets <small>... which do the same thing!</small></h1>
+  </div>
+  <form action="{{post_url}}" method="POST">
+    <div class="row">
+      <div class="span6">
+        <h2>Title</h2>
+        <input class="title" name="title" type="text" />
+      </div>
     </div>
-    <div class="snippet-left">
-      <textarea name="left" cols="40" rows="10"></textarea>
+    <div class="row">
+      <div class="span6">
+        <h2>First snippet</h2>
+        <textarea class="snippet" name="left" rows="10"></textarea>
+      </div>
+      <div class="span6">
+        <h2>Second snippet</h2>
+        <textarea class="snippet" name="right" rows="10"></textarea>
+      </div>
     </div>
-    <div class="snippet-right">
-      <textarea name="right" cols="40" rows="10"></textarea>
-    </div>
-    <div class="field">
-      <a href="#" class="submit">Submit</a>
+    <div class="row">
+      <div class="span12">
+        <a href="#" class="submit btn btn-primary btn-large">Submit it!</a>
+      </div>
     </div>
   </form>
-</div>
+</section>

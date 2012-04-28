@@ -1,8 +1,4 @@
-%% @author OJ Reeves <oj@buffered.io>
-%% @copyright 2012 OJ Reeves
-
 -module(csd_view).
-
 -author('OJ Reeves <oj@buffered.io>').
 
 -export([home/0, home/2]).
