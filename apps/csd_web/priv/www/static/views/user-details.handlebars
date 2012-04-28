@@ -1,0 +1,34 @@
+<header class="subhead">
+  {{#if is_current}}
+  <h1>Your activity</h1>
+  <p class="lead">What have you been up to...</p>
+  {{else}}
+  <h1>{{user_name}}'s activity</h1>
+  <p class="lead">Check out what {{user_name}} has been up to...</p>
+  {{/if}}
+</header>
+<section>
+  <div class="page-header">
+    <h1>Snippets <small>... what's hot and what's not.</small></h1>
+  </div>
+  <div class="row">
+    <div class="span8">
+      <table class="table table-bordered table-striped">
+        <thead>
+          <tr>
+            <th>Title</th>
+            <th>Submitted</th>
+          </tr>
+        </thead>
+        <tbody>
+        {{#each snippets}}
+          <tr>
+            <td><a href="#snippet/{{this.key}}">{{this.title}}</a></td>
+            <td>{{this.created}}</td>
+          </tr>
+        {{/each}}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
