@@ -9,48 +9,69 @@
     },
 
     render: function() {
-      var html = router.renderTemplate('new-snippet', {post_url:'/snippet'});
+      var html = $(router.renderTemplate('new-snippet', {post_url:'/snippet'}));
       $(this.el).html(html);
       return this.el;
     },
 
     saveSnippet: function(e) {
       e.preventDefault();
-      $.post(this.$('form').attr('action'), this.serialize(), function(id) {
-        router.goToSnippet(id);
-      });
+
+      var valid = this.validate('#title');
+      valid = this.validate('#left') && valid;
+      valid = this.validate('#right') && valid;
+
+      if(valid) {
+        $.post(this.$('form').attr('action'), this.serialize(), function(id) {
+          router.goToSnippet(id);
+        });
+      }
+    },
+
+    validate: function(fieldId) {
+      var field = this.$(fieldId);
+      if(field.val().length == 0) {
+        field.parent().parent().addClass('error');
+        return false;
+      }
+
+      field.parent().parent().removeClass('error').addClass('success');
+      return true;
     },
 
     serialize: function() {
       return {
-        title: $.trim(this.$('input[name="title"]').val()),
-        left: $.trim(this.$('textarea[name="left"]').val()),
-        right: $.trim(this.$('textarea[name="right"]').val())
+        title: $.trim(this.$('#title').val()),
+        left: $.trim(this.$('#left').val()),
+        right: $.trim(this.$('#right').val())
       };
     }
   });
 
   // ------------------------------------------------------------------------------------
 
-  var SnippetModel = Backbone.Model.extend({
+  var VoteActionsModel = Backbone.Model.extend({
+    vote: function(which, left, right) {
+      this.set('voted', which);
+      this.set('left', left);
+      this.set('right', right);
+    },
     toJSON: function() {
-      return {
-        left: $.trim(this.get('left')),
-        right: $.trim(this.get('right')),
-        title: $.trim(this.get('title')),
-        key: this.get('key')
-      };
+      voted = $.trim(this.get('voted')).length > 0,
+      voted_left = $.trim(this.get('voted')) === "left",
+      voted_right = $.trim(this.get('voted')) === "right",
+      key = $.trim(this.get('key'))
     }
   });
 
-  var SnippetView = Backbone.View.extend({
+  var VoteActionsView = Backbone.View.extend({
     events: {
       'click a.vote-left': 'voteLeft',
       'click a.vote-right': 'voteRight'
     },
 
     render: function() {
-      var html = router.renderTemplate('snippet', this.model.toJSON());
+      var html = router.renderTemplate('vote-actions', this.model.toJSON());
       $(this.el).html(html);
       return this.el;
     },
@@ -71,9 +92,127 @@
         which: which
       };
       //$.post("/vote", postData, function(result) {
-        self.$('.vote-buttons').hide();
-        self.$('.vote-complete').show();
+        this.model.vote(which);
+        //self.$('.vote-buttons').hide();
+        //self.$('.vote-complete').show();
+
+        this.trigger('votes:updated', {
+          left: Math.floor((Math.random()*100)+1),
+          right: Math.floor((Math.random()*100)+1)
+        });
       //}, 'json');
+    }
+  });
+
+  // ------------------------------------------------------------------------------------
+
+  var VotesModel = Backbone.Model.extend({
+    toJSON: function() {
+      return {
+        left: this.get('left'),
+        right: this.get('right')
+      };
+    }
+  });
+
+  var VotesView = Backbone.View.extend({
+    votesUpdated: function(votes) {
+      var self = this;
+
+      self.model.set('left', votes.left);
+      self.model.set('right', votes.right);
+
+      var total = votes.left + votes.right;
+      var leftRatio = votes.left / total * 100;
+      var rightRatio = votes.right / total * 100;
+
+      var winner = votes.left > votes.right
+        ? "left"
+        : (votes.left < votes.right ? "right" : "");
+
+      this.refresh(winner, 'left', votes.left, leftRatio);
+      this.refresh(winner, 'right', votes.right, rightRatio);
+    },
+
+    refresh: function(winner, side, votes, ratio) {
+      self.$('#' + side + '_votes').text('?');
+      self.$('#' + side + '_ratio').animate({width: ratio + '%'}, 'slow', 'linear',
+        function() {
+          self.$('#' + side + '_votes').text(votes)
+            .removeClass('badge-success')
+            .removeClass('badge-important')
+            .removeClass('badge-info')
+            .addClass(winner.length > 0
+              ? (winner === side ? 'badge-success' : 'badge-important')
+              : 'badge-info');
+
+          var parent = self.$('#' + side + '_ratio').parent()
+            .removeClass('progress-success')
+            .removeClass('progress-danger');
+
+          if(winner.length > 0) {
+            parent.addClass(winner === side ? 'progress-success' : 'progress-danger');
+          }
+        });
+    },
+
+    render: function() {
+      var self = this;
+      var html = router.renderTemplate('votes', self.model.toJSON());
+      $(self.el).html(html);
+
+      _.delay(function() {
+        self.votesUpdated(self.model.toJSON());
+      }, 500);
+
+      return self.el;
+    }
+  });
+
+  // ------------------------------------------------------------------------------------
+
+  var SnippetModel = Backbone.Model.extend({
+    initialize: function(spec) {
+      var voteModel = {
+        left: Math.floor((Math.random()*100)+1),
+        right: Math.floor((Math.random()*100)+1)
+      };
+      this.votes = new VotesModel(voteModel);
+
+      var actionModel = {
+        voted: '',
+        key: spec.key
+      };
+      this.actions = new VoteActionsModel(actionModel);
+    },
+
+    toJSON: function() {
+      return {
+        left: $.trim(this.get('left')),
+        right: $.trim(this.get('right')),
+        title: $.trim(this.get('title')),
+        key: this.get('key')
+      };
+    }
+  });
+
+  var SnippetView = Backbone.View.extend({
+    votesUpdated: function(votes) {
+      this.votes.votesUpdated(votes);
+    },
+
+    initialize: function(spec) {
+      this.actions = new VoteActionsView({model: spec.model.actions});
+      this.votes = new VotesView({model: spec.model.votes});
+      this.actions.on("votes:updated", this.votesUpdated, this);
+    },
+
+    render: function() {
+      var html = router.renderTemplate('snippet', this.model.toJSON());
+      $(this.el).html(html).append(this.votes.render())
+        .append(this.actions.render());
+
+      return this.el;
     }
   });
 

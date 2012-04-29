@@ -1,31 +1,44 @@
 <header class="subhead">
-  <h1>Submit new snippet</h1>
+  <h1>Post a new snippet</h1>
 </header>
 <section>
   <div class="page-header">
     <h1>Two snippets <small>... which do the same thing!</small></h1>
   </div>
-  <form action="{{post_url}}" method="POST">
-    <div class="row">
-      <div class="span6">
-        <h2>Title</h2>
-        <input class="title" name="title" type="text" />
-      </div>
+  <div class="row">
+    <div class="span6">
+      <form action="{{post_url}}" class="form-horizontal">
+        <fieldset>
+          <div class="control-group">
+            <label class="control-label" for="title">Title</label>
+            <div class="controls">
+              <input id="title" name="title" class="title span6" type="text" />
+              <p class="help-block">Please enter a title. Make it snappy. Make it relevant.
+              Make it inciting.</p>
+            </div>
+          </div>
+          <div class="control-group">
+            <label class="control-label" for="left">First snippet</label>
+            <div class="controls">
+              <textarea id="left" name="left" rows="7" class="snippet span6"></textarea>
+              <p class="help-block">Put your first snippet here. Make it interesting.
+              Or not.</span>
+            </div>
+          </div>
+          <div class="control-group">
+            <label class="control-label" for="right">Second snippet</label>
+            <div class="controls">
+              <textarea id="right" name="right" rows="7" class="snippet span6"></textarea>
+              <p class="help-block">Put the second snippet here, make sure it does
+              the same thing (or at least something similar) to the first snippet. Make it
+              fun. Make it quirky.</p>
+            </div>
+          </div>
+          <div class="form-actions">
+            <a href="#" class="btn btn-primary btn-large submit">Submt it!</a>
+          </div>
+        </fieldset>
+      </form>
     </div>
-    <div class="row">
-      <div class="span6">
-        <h2>First snippet</h2>
-        <textarea class="snippet" name="left" rows="10"></textarea>
-      </div>
-      <div class="span6">
-        <h2>Second snippet</h2>
-        <textarea class="snippet" name="right" rows="10"></textarea>
-      </div>
-    </div>
-    <div class="row">
-      <div class="span12">
-        <a href="#" class="submit btn btn-primary btn-large">Submit it!</a>
-      </div>
-    </div>
-  </form>
+  </div>
 </section>

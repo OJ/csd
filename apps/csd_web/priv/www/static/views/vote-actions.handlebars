@@ -1,0 +1,49 @@
+{{#if voted}}
+<div class="row vote-buttons">
+  <div class="span1">&nbsp;
+  </div>
+  <div class="span4 centered">
+  {{#if voted_left}}
+    <div class="alert alert-success">
+      <button class="close" data-dismiss="alert">&times;</button>
+      <i class="icon-arrow-up"></i> You've already voted for this one.
+    </div>
+  {{else}}
+  &nbsp;
+  {{/if}}
+  </div>
+  <div class="span2">&nbsp;
+  </div>
+  <div class="span4 centered">
+  {{#if voted_right}}
+    <div class="alert alert-success">
+      <button class="close" data-dismiss="alert">&times;</button>
+      You've already voted for this one. <i class="icon-arrow-up"></i>
+    </div>
+  {{else}}
+  &nbsp;
+  {{/if}}
+  </div>
+  <div class="span1">&nbsp;
+  </div>
+</div>
+{{else}}
+<div class="row vote-buttons">
+  <div class="span6">
+    <a class="btn btn-large btn-primary pull-right vote-left" data-key="{{key}}" href="#"><i class="icon-arrow-up icon-white"></i> This one rules.</a>
+  </div>
+  <div class="span6 pull-left">
+    <a class="btn btn-large btn-primary vote-right" data-key="{{key}}" href="#">No, this one does! <i class="icon-arrow-up icon-white"></i></a>
+  </div>
+</div>
+<div class="row vote-complete no-show">
+  <div class="span4">&nbsp;
+  </div>
+  <div class="span4 centered">
+    <div class="alert alert-success">
+      <button class="close" data-dismiss="alert">&times;</button>
+      <strong>Thanks!</strong> Your vote has been submitted.
+    </div>
+  </div>
+</div>
+{{/if}}

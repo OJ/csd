@@ -8,11 +8,9 @@ body {
 }
 
 input.title {
-  width: 100%;
 }
 
 textarea.snippet {
-  width: 100%;
   font-family: Consolas, Lucidia Console, DejaVu Sans Mono, Courier;
 }
 
@@ -23,7 +21,11 @@ textarea.snippet {
 .vote-buttons {
   padding-top: 15px;
 }
+
 .vote-complete {
   padding-top: 15px;
+}
+
+.no-show {
   display: none;
 }
