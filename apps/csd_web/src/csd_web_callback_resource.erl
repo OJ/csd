@@ -33,7 +33,9 @@ handle_callback(ReqData, State) ->
   UserName = proplists:get_value(<<"screen_name">>, Json),
   NewReqData = cookie:store_auth(ReqData, UserId, UserName, AccessToken, AccessTokenSecret),
 
-  % TODO: store the 'session' in Riak in an ETS backend
+  User = csd_user:to_user(UserId, UserName),
+  %io:format("~p~n", [User]),
+  {ok, _} = csd_user:save(User),
 
   % TODO: error handlng for when things don't go to plan
   {{true, conf:get_val(urimap, home)}, NewReqData, State}.

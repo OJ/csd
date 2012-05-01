@@ -15,10 +15,11 @@
     update/2,
     get_value/1,
     save/2,
-    get_index_int/2,
-    set_index_int/3,
+    get_index/3,
+    set_index/4,
+    set_indexes/2,
     mapred/3,
-    get_mapred_phase_input_index_int/3,
+    get_mapred_phase_input_index/4,
     get_mapred_phase_map_js/1,
     get_mapred_phase_map_js/2,
     get_mapred_phase_map_js/3,
@@ -26,7 +27,9 @@
     get_mapred_phase_reduce_js/2,
     get_mapred_phase_reduce_js/3,
     get_mapred_reduce_sort_js/1,
-    get_mapred_reduce_sort_js/2
+    get_mapred_reduce_sort_js/2,
+    get_mapred_reduce_sum_js/0,
+    get_mapred_reduce_sum_js/1
   ]).
 
 %% helper functions for generating unique keys.
@@ -79,26 +82,39 @@ update(RiakObj, NewValue) ->
   NewRiakObj = riakc_obj:update_value(RiakObj, NewValue),
   NewRiakObj.
 
-%% @spec set_index_int(riakc_obj(), string, term()) -> riakc_obj()
+%% @spec set_index_int(riakc_obj(), string, int) -> riakc_obj()
 %% @doc Adds an integer index of the given name to the object's
 %%      metadata and returns the updated object.
-set_index_int(RiakObj, Name, Value) ->
+set_index(RiakObj, Type, Name, Value) ->
   Meta = riakc_obj:get_update_metadata(RiakObj),
   Index = case dict:find(?INDEX_KEY, Meta) of
     error -> [];
-    I -> I
+    {ok, I} -> I
   end,
-  NewIndex = dict:to_list(dict:store(int_index(Name), Value, dict:from_list(Index))),
+  NewIndex = dict:to_list(dict:store(index(Type, Name), value(Value), dict:from_list(Index))),
+  riakc_obj:update_metadata(RiakObj, dict:store(?INDEX_KEY, NewIndex, Meta)).
+
+set_indexes(RiakObj, Indexes) ->
+  Meta = riakc_obj:get_update_metadata(RiakObj),
+  Index = case dict:find(?INDEX_KEY, Meta) of
+    error -> [];
+    {ok, I} -> I
+  end,
+  UpdatedIndexes = lists:foldl(fun({T, N, V}, I) ->
+        dict:store(index(T, N), value(V), I)
+    end,
+    dict:from_list(Index), Indexes),
+  NewIndex = dict:to_list(UpdatedIndexes),
   riakc_obj:update_metadata(RiakObj, dict:store(?INDEX_KEY, NewIndex, Meta)).
 
 %% @spec get_index_int(riakc_obj(), string) -> int
 %% @doc Queries the object meta data to pull out an index of
 %%      integer type. Assumes that the index exists, expect
 %%      failure when querying when metadata/index missing.
-get_index_int(RiakObj, Name) ->
+get_index(RiakObj, Type, Name) ->
   Meta = riakc_obj:get_metadata(RiakObj),
   Indexes = dict:fetch(?INDEX_KEY, Meta),
-  proplists:get_value(int_index(Name), Indexes).
+  proplists:get_value(index(Type, Name), Indexes).
 
 %% @spec get_value(riakc_obj()) -> term()
 %% @doc Retrieves the stored value from within the riakc
@@ -117,12 +133,12 @@ mapred(RiakPid, Input, Phases) when is_list(Phases) ->
   Result = riakc_pb_socket:mapred(RiakPid, Input, Phases),
   Result.
 
-get_mapred_phase_input_index_int(Bucket, Index, Value) when is_integer(Value) ->
-  get_mapred_phase_input_index_int(Bucket, Index, integer_to_list(Value));
-get_mapred_phase_input_index_int(Bucket, Index, Value) when is_list(Value) ->
-  get_mapred_phase_input_index_int(Bucket, Index, list_to_binary(Value));
-get_mapred_phase_input_index_int(Bucket, Index, Value) when is_binary(Value) ->
-  {index, Bucket, list_to_binary(int_index(Index)), Value}.
+get_mapred_phase_input_index(Bucket, Type, Index, Value) when is_integer(Value) ->
+  get_mapred_phase_input_index(Bucket, Type, Index, integer_to_list(Value));
+get_mapred_phase_input_index(Bucket, Type, Index, Value) when is_list(Value) ->
+  get_mapred_phase_input_index(Bucket, Type, Index, list_to_binary(Value));
+get_mapred_phase_input_index(Bucket, Type, Index, Value) when is_binary(Value) ->
+  {index, Bucket, index(Type, Index), Value}.
 
 get_mapred_phase_map_js(JsSource) ->
   get_mapred_phase_map_js(JsSource, true).
@@ -131,7 +147,7 @@ get_mapred_phase_map_js(JsSource, Keep) ->
   get_mapred_phase_map_js(JsSource, Keep, none).
 
 get_mapred_phase_map_js(JsSource, Keep, Arg) ->
-  get_mapred_phase_map({jsanon, JsSource}, Arg, Keep).
+  get_mapred_phase_map({jsanon, JsSource}, Keep, Arg).
 
 get_mapred_phase_map(Fun, Keep, Arg) ->
   {map, Fun, Arg, Keep}.
@@ -143,7 +159,7 @@ get_mapred_phase_reduce_js(JsSource, Keep) ->
   get_mapred_phase_reduce_js(JsSource, Keep, none).
 
 get_mapred_phase_reduce_js(JsSource, Keep, Arg) ->
-  get_mapred_phase_reduce({jsanon, JsSource}, Arg, Keep).
+  get_mapred_phase_reduce({jsanon, JsSource}, Keep, Arg).
 
 get_mapred_phase_reduce(Fun, Keep, Arg) ->
   {reduce, Fun, Arg, Keep}.
@@ -153,6 +169,12 @@ get_mapred_reduce_sort_js(CompareFun) ->
 
 get_mapred_reduce_sort_js(CompareFun, Keep) ->
   {reduce, {jsfun, <<"Riak.reduceSort">>}, CompareFun, Keep}.
+
+get_mapred_reduce_sum_js() ->
+  get_mapred_reduce_sum_js(true).
+
+get_mapred_reduce_sum_js(Keep) ->
+  {reduce, {jsfun, <<"Riak.reduceSum">>}, <<"">>, Keep}.
 
 %% @spec new_key() -> key()
 %% @doc Generate an close-to-unique key that can be used to identify
@@ -171,5 +193,13 @@ new_key(List) ->
   Hash = erlang:phash2(List),
   base64:encode(<<Hash:32>>).
 
-int_index(Name) ->
-  Name ++ ?INDEX_SUFFIX_INT.
+index(int, Name) ->
+  iolist_to_binary([Name, ?INDEX_SUFFIX_INT]);
+index(bin, Name) ->
+  iolist_to_binary([Name, ?INDEX_SUFFIX_BIN]).
+
+value(V) when is_list(V) ->
+  list_to_binary(V);
+value(V) ->
+  V.
+

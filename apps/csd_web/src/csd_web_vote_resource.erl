@@ -1,7 +1,8 @@
--module(csd_web_snippet_resource).
+-module(csd_web_vote_resource).
 -author('OJ Reeves <oj@buffered.io>').
 
 -export([init/1,
+    allowed_methods/2,
     content_types_provided/2,
     to_json/2
   ]).
@@ -17,11 +18,12 @@ content_types_provided(ReqData, State) ->
   ],
   {Types, ReqData, State}.
 
+allowed_methods(ReqData, State) ->
+  {['GET'], ReqData, State}.
+
 to_json(ReqData, State) ->
   PathInfo = wrq:path_info(ReqData),
   {ok, SnippetKey} = dict:find(key, PathInfo),
-  {ok, Snippet} = csd_snippet:fetch(list_to_binary(SnippetKey)),
-
   {ok, Count} = case cookie:load_auth(ReqData) of
     {ok, {UserId, _, _, _}} ->
       csd_vote:count_for_snippet(SnippetKey, UserId);
@@ -29,12 +31,5 @@ to_json(ReqData, State) ->
       csd_vote:count_for_snippet(SnippetKey)
   end,
 
-  Json = iolist_to_binary([
-      "{\"snippet\":",
-      csd_snippet:to_json(Snippet),
-      ",\"count\":",
-      csd_vote:to_json(Count),
-      "}"
-    ]),
-
+  Json = csd_vote:to_json(Count),
   {Json, ReqData, State}.

@@ -28,6 +28,7 @@
   </div>
 </div>
 {{else}}
+{{#if show_actions}}
 <div class="row vote-buttons">
   <div class="span6">
     <a class="btn btn-large btn-primary pull-right vote-left" data-key="{{key}}" href="#"><i class="icon-arrow-up icon-white"></i> This one rules.</a>
@@ -46,4 +47,16 @@
     </div>
   </div>
 </div>
+{{else}}
+<div class="row vote-buttons">
+  <div class="span4">&nbsp;
+  </div>
+  <div class="span4 centered">
+    <div class="alert alert-error">
+      <button class="close" data-dismiss="alert">&times;</button>
+      <strong>Voting disabled!</strong> You need to be <a href="#login">signed in</a> to vote.
+    </div>
+  </div>
+</div>
+{{/if}}
 {{/if}}

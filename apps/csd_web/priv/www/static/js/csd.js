@@ -56,11 +56,15 @@
       this.set('left', left);
       this.set('right', right);
     },
+
     toJSON: function() {
-      voted = $.trim(this.get('voted')).length > 0,
-      voted_left = $.trim(this.get('voted')) === "left",
-      voted_right = $.trim(this.get('voted')) === "right",
-      key = $.trim(this.get('key'))
+      return {
+        voted: $.trim(this.get('voted')).length > 0,
+        voted_left: $.trim(this.get('voted')) === "left",
+        voted_right: $.trim(this.get('voted')) === "right",
+        key: $.trim(this.get('key')),
+        show_actions: router.isUserSignedIn()
+      };
     }
   });
 
@@ -88,19 +92,20 @@
       var self = this;
       e.preventDefault();
       var postData = {
-        key: $(e).data('key'),
+        snippet: $(e.target).data('key'),
         which: which
       };
-      //$.post("/vote", postData, function(result) {
-        this.model.vote(which);
-        //self.$('.vote-buttons').hide();
-        //self.$('.vote-complete').show();
 
-        this.trigger('votes:updated', {
-          left: Math.floor((Math.random()*100)+1),
-          right: Math.floor((Math.random()*100)+1)
+      $.post("/vote", postData, function(result) {
+        self.model.vote(which);
+        self.$('.vote-buttons').hide();
+        self.$('.vote-complete').show();
+
+        self.trigger('votes:updated', {
+          left: result.left,
+          right: result.right
         });
-      //}, 'json');
+      });
     }
   });
 
@@ -136,24 +141,31 @@
 
     refresh: function(winner, side, votes, ratio) {
       self.$('#' + side + '_votes').text('?');
-      self.$('#' + side + '_ratio').animate({width: ratio + '%'}, 'slow', 'linear',
-        function() {
-          self.$('#' + side + '_votes').text(votes)
-            .removeClass('badge-success')
-            .removeClass('badge-important')
-            .removeClass('badge-info')
-            .addClass(winner.length > 0
-              ? (winner === side ? 'badge-success' : 'badge-important')
-              : 'badge-info');
 
-          var parent = self.$('#' + side + '_ratio').parent()
-            .removeClass('progress-success')
-            .removeClass('progress-danger');
+      var onFinish = function() {
+        self.$('#' + side + '_votes').text(votes)
+          .removeClass('badge-success')
+          .removeClass('badge-important')
+          .removeClass('badge-info')
+          .addClass(winner.length > 0
+            ? (winner === side ? 'badge-success' : 'badge-important')
+            : 'badge-info');
 
-          if(winner.length > 0) {
-            parent.addClass(winner === side ? 'progress-success' : 'progress-danger');
-          }
-        });
+        var parent = self.$('#' + side + '_ratio').parent()
+          .removeClass('progress-success')
+          .removeClass('progress-danger');
+
+        if(winner.length > 0) {
+          parent.addClass(winner === side ? 'progress-success' : 'progress-danger');
+        }
+      };
+
+      if(votes > 0) {
+        self.$('#' + side + '_ratio').animate({width: ratio + '%'},
+            'slow', 'linear', onFinish);
+      } else {
+        onFinish();
+      }
     },
 
     render: function() {
@@ -173,17 +185,19 @@
 
   var SnippetModel = Backbone.Model.extend({
     initialize: function(spec) {
-      var voteModel = {
-        left: Math.floor((Math.random()*100)+1),
-        right: Math.floor((Math.random()*100)+1)
-      };
-      this.votes = new VotesModel(voteModel);
+      this.votes = new VotesModel({
+        left: spec.count.left,
+        right: spec.count.right
+      });
 
-      var actionModel = {
-        voted: '',
-        key: spec.key
-      };
-      this.actions = new VoteActionsModel(actionModel);
+      this.actions = new VoteActionsModel({
+        voted: spec.count.which,
+        key: spec.snippet.key
+      });
+
+      this.set('left', spec.snippet.left);
+      this.set('right', spec.snippet.right);
+      this.set('title', spec.snippet.title);
     },
 
     toJSON: function() {
@@ -334,6 +348,12 @@
       }
 
       return self.cache[name](data || {});
+    },
+
+    isUserSignedIn: function() {
+      return this.currentUserId !== null
+        && this.currentUserId !== undefined
+        && this.currentUserId !== 0;
     },
 
     start: function(userId) {
