@@ -1,13 +1,10 @@
-%% @author OJ Reeves <oj@buffered.io>
-%% @copyright 2010 OJ Reeves
-
-%% @doc Functions which wrap up the communication with the Riak cluster
-%%      plus a few other helper functions.
-
 -module(csd_riak).
 -author('OJ Reeves <oj@buffered.io>').
 
-%% Riak exports
+%% ------------------------------------------------------------------
+%% API Function Exports
+%% ------------------------------------------------------------------
+
 -export([connect/1,
     create/3,
     create/4,
@@ -28,18 +25,17 @@
     get_mapred_phase_reduce_js/3,
     get_mapred_reduce_sort_js/1,
     get_mapred_reduce_sort_js/2,
-    get_mapred_reduce_sum_js/0,
-    get_mapred_reduce_sum_js/1
+    new_key/0,
+    new_key/1
   ]).
-
-%% helper functions for generating unique keys.
--export([new_key/0, new_key/1]).
 
 -define(INDEX_KEY, <<"index">>).
 -define(INDEX_SUFFIX_INT, "_int").
 -define(INDEX_SUFFIX_BIN, "_bin").
 
-%% ----------------------------------------------- Exported Functions
+%% ------------------------------------------------------------------
+%% API Function Definitions
+%% ------------------------------------------------------------------
 
 %% @spec connect(connection_info()) -> pid()
 %% @doc Create a connection to the specified Riak cluster and
@@ -129,10 +125,12 @@ save(RiakPid, RiakObj) ->
   Result = riakc_pb_socket:put(RiakPid, RiakObj),
   Result.
 
+%% @doc Executes a map/reduce of the given Phases job over the Inputs.
 mapred(RiakPid, Input, Phases) when is_list(Phases) ->
   Result = riakc_pb_socket:mapred(RiakPid, Input, Phases),
   Result.
 
+%% @doc Creates a map/reduce Input phase for a secondary index input.
 get_mapred_phase_input_index(Bucket, Type, Index, Value) when is_integer(Value) ->
   get_mapred_phase_input_index(Bucket, Type, Index, integer_to_list(Value));
 get_mapred_phase_input_index(Bucket, Type, Index, Value) when is_list(Value) ->
@@ -140,41 +138,44 @@ get_mapred_phase_input_index(Bucket, Type, Index, Value) when is_list(Value) ->
 get_mapred_phase_input_index(Bucket, Type, Index, Value) when is_binary(Value) ->
   {index, Bucket, index(Type, Index), Value}.
 
+%% @doc Creates a map/reduce Map phase from raw JS source. This overload
+%%      defaults Keep to true and Arg to none.
 get_mapred_phase_map_js(JsSource) ->
   get_mapred_phase_map_js(JsSource, true).
 
+%% @doc Creates a map/reduce Map phase from raw JS source. This overload
+%%      defaults Arg to none.
 get_mapred_phase_map_js(JsSource, Keep) ->
   get_mapred_phase_map_js(JsSource, Keep, none).
 
+%% @doc Creates a map/reduce Map phase from raw JS source.
 get_mapred_phase_map_js(JsSource, Keep, Arg) ->
-  get_mapred_phase_map({jsanon, JsSource}, Keep, Arg).
+  {map, {jsanon, JsSource}, Arg, Keep}.
 
-get_mapred_phase_map(Fun, Keep, Arg) ->
-  {map, Fun, Arg, Keep}.
-
+%% @doc Creates a map/reduce Reduce phase from raw JS source. This overload
+%%      defaults Keep to true and Arg to none.
 get_mapred_phase_reduce_js(JsSource) ->
   get_mapred_phase_reduce_js(JsSource, true).
 
+%% @doc Creates a map/reduce Reduce phase from raw JS source. This overload
+%%      defaults Keep to true.
 get_mapred_phase_reduce_js(JsSource, Keep) ->
   get_mapred_phase_reduce_js(JsSource, Keep, none).
 
+%% @doc Creates a map/reduce Reduce phase from raw JS source.
 get_mapred_phase_reduce_js(JsSource, Keep, Arg) ->
-  get_mapred_phase_reduce({jsanon, JsSource}, Keep, Arg).
+  {reduce, {jsanon, JsSource}, Arg, Keep}.
 
-get_mapred_phase_reduce(Fun, Keep, Arg) ->
-  {reduce, Fun, Arg, Keep}.
-
+%% @doc Creates a map/reduce Reduce sort phase using Riak's built in sort function
+%%      using the specified comparison function written in raw JS. This overload
+%%      defaults Keep to true.
 get_mapred_reduce_sort_js(CompareFun) ->
   get_mapred_reduce_sort_js(CompareFun, true).
 
+%% @doc Creates a map/reduce Reduce sort phase using Riak's built in sort function
+%%      using the specified comparison function written in raw JS.
 get_mapred_reduce_sort_js(CompareFun, Keep) ->
   {reduce, {jsfun, <<"Riak.reduceSort">>}, CompareFun, Keep}.
-
-get_mapred_reduce_sum_js() ->
-  get_mapred_reduce_sum_js(true).
-
-get_mapred_reduce_sum_js(Keep) ->
-  {reduce, {jsfun, <<"Riak.reduceSum">>}, <<"">>, Keep}.
 
 %% @spec new_key() -> key()
 %% @doc Generate an close-to-unique key that can be used to identify
@@ -192,6 +193,10 @@ new_key() ->
 new_key(List) ->
   Hash = erlang:phash2(List),
   base64:encode(<<Hash:32>>).
+
+%% ------------------------------------------------------------------
+%% Private Function Definitions
+%% ------------------------------------------------------------------
 
 index(int, Name) ->
   iolist_to_binary([Name, ?INDEX_SUFFIX_INT]);

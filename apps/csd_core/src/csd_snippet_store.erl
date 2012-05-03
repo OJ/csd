@@ -34,7 +34,6 @@ list_for_user(RiakPid, UserId) ->
   Index = csd_riak:get_mapred_phase_input_index(?BUCKET, int, ?USERID_INDEX, UserId),
   Map = csd_riak:get_mapred_phase_map_js(?LIST_MAP_JS, false),
   Sort = csd_riak:get_mapred_reduce_sort_js(?REDUCE_SORT_JS),
-  %Sort = csd_riak:get_mapred_phase_reduce_js(?REDUCE_SORT_JS),
   Result = case csd_riak:mapred(RiakPid, Index, [Map, Sort]) of
     {ok, [{1, List}]} -> List;
     {ok, []} -> []

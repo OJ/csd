@@ -26,9 +26,8 @@ save(RiakPid, User) ->
   UserId = list_to_binary(integer_to_list(IntId)),
 
   case csd_riak:fetch(RiakPid, ?BUCKET, UserId) of
-    {ok, RiakObj} ->
-      NewRiakObj = csd_riak:update(RiakObj, csd_user:to_json(User)),
-      ok = csd_riak:save(RiakPid, NewRiakObj),
+    {ok, _RiakObj} ->
+      % user already exists, we don't need to save anything.
       {ok, User};
     {error, notfound} ->
       NewRiakObj = csd_riak:create(?BUCKET, UserId, csd_user:to_json(User)),

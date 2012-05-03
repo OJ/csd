@@ -19,8 +19,6 @@
 -record(snippet, {
     user_id,
     key,
-    votes_left = 0,
-    votes_right = 0,
     data
   }).
 

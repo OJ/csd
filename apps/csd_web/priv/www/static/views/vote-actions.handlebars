@@ -1,8 +1,6 @@
 {{#if voted}}
 <div class="row vote-buttons">
-  <div class="span1">&nbsp;
-  </div>
-  <div class="span4 centered">
+  <div class="span4 offset1 centered">
   {{#if voted_left}}
     <div class="alert alert-success">
       <button class="close" data-dismiss="alert">&times;</button>
@@ -12,9 +10,7 @@
   &nbsp;
   {{/if}}
   </div>
-  <div class="span2">&nbsp;
-  </div>
-  <div class="span4 centered">
+  <div class="span4 offset2 centered">
   {{#if voted_right}}
     <div class="alert alert-success">
       <button class="close" data-dismiss="alert">&times;</button>
@@ -23,8 +19,6 @@
   {{else}}
   &nbsp;
   {{/if}}
-  </div>
-  <div class="span1">&nbsp;
   </div>
 </div>
 {{else}}
@@ -38,9 +32,7 @@
   </div>
 </div>
 <div class="row vote-complete no-show">
-  <div class="span4">&nbsp;
-  </div>
-  <div class="span4 centered">
+  <div class="span4 offset4 centered">
     <div class="alert alert-success">
       <button class="close" data-dismiss="alert">&times;</button>
       <strong>Thanks!</strong> Your vote has been submitted.
@@ -49,9 +41,7 @@
 </div>
 {{else}}
 <div class="row vote-buttons">
-  <div class="span4">&nbsp;
-  </div>
-  <div class="span4 centered">
+  <div class="span4 offset4 centered">
     <div class="alert alert-error">
       <button class="close" data-dismiss="alert">&times;</button>
       <strong>Voting disabled!</strong> You need to be <a href="#login">signed in</a> to vote.

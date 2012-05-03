@@ -5,7 +5,6 @@
 
 -define(BUCKET, <<"vote">>).
 -define(SNIPPET_INDEX, <<"snippetid">>).
--define(VOTETYPE_INDEX, <<"which">>).
 -define(USER_INDEX, <<"userid">>).
 -define(COUNT_SNIP_MAP_JS, <<"function(v){var d=Riak.mapValuesJson(v)[0];if(d.which===\"left\"){return[[1,0]];}return[[0,1]];}">>).
 -define(COUNT_SNIP_RED_JS, <<"function(vals,arg){if(vals.length===0){return[[0,0]];}return[vals.reduce(function(a,v){return[a[0]+v[0],a[1]+v[1]];})];}">>).
@@ -43,7 +42,6 @@ count_for_snippet(RiakPid, SnippetId, UserId) ->
 save(RiakPid, Vote) ->
   VoteId = csd_vote:get_id(Vote),
   UserId = csd_vote:get_user_id(Vote),
-  Which = csd_vote:get_which(Vote),
   SnippetId = csd_vote:get_snippet_id(Vote),
 
   case csd_riak:fetch(RiakPid, ?BUCKET, VoteId) of
@@ -52,7 +50,6 @@ save(RiakPid, Vote) ->
     {error, notfound} ->
       RiakObj = csd_riak:create(?BUCKET, VoteId, csd_vote:to_json(Vote)),
       Indexes = [
-        {bin, ?VOTETYPE_INDEX, Which},
         {bin, ?SNIPPET_INDEX, SnippetId},
         {int, ?USER_INDEX, UserId}
       ],
