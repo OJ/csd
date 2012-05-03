@@ -30,8 +30,8 @@
   ]).
 
 -define(INDEX_KEY, <<"index">>).
--define(INDEX_SUFFIX_INT, "_int").
--define(INDEX_SUFFIX_BIN, "_bin").
+-define(INDEX_SUFFIX_INT, <<"_int">>).
+-define(INDEX_SUFFIX_BIN, <<"_bin">>).
 
 %% ------------------------------------------------------------------
 %% API Function Definitions
@@ -78,8 +78,7 @@ update(RiakObj, NewValue) ->
   NewRiakObj = riakc_obj:update_value(RiakObj, NewValue),
   NewRiakObj.
 
-%% @spec set_index_int(riakc_obj(), string, int) -> riakc_obj()
-%% @doc Adds an integer index of the given name to the object's
+%% @doc Adds an index of the given type and name to the object's
 %%      metadata and returns the updated object.
 set_index(RiakObj, Type, Name, Value) ->
   Meta = riakc_obj:get_update_metadata(RiakObj),
@@ -90,6 +89,8 @@ set_index(RiakObj, Type, Name, Value) ->
   NewIndex = dict:to_list(dict:store(index(Type, Name), value(Value), dict:from_list(Index))),
   riakc_obj:update_metadata(RiakObj, dict:store(?INDEX_KEY, NewIndex, Meta)).
 
+%% @doc Adds indexes of the given types and names to the object's
+%%      metadata and returns the updated object.
 set_indexes(RiakObj, Indexes) ->
   Meta = riakc_obj:get_update_metadata(RiakObj),
   Index = case dict:find(?INDEX_KEY, Meta) of

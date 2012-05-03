@@ -19,23 +19,21 @@ ensure_started(App) ->
 %% @doc Starts the app for inclusion in a supervisor tree
 start_link() ->
     start_common(),
-    csd_core_sup:start_link().
+    pooler_sup:start_link().
 
 %% @spec start() -> ok
 %% @doc Start the csd_core server.
 start() ->
     start_common(),
-    application:start(csd_core).
+    ensure_started(pooler).
 
 %% @spec stop() -> ok
 %% @doc Stop the csd_core server.
 stop() ->
-    Res = application:stop(csd_core),
     application:stop(pooler),
     application:stop(crypto),
-    Res.
+    ok.
 
 %% @private
 start_common() ->
-    ensure_started(crypto),
-    ensure_started(pooler).
+    ensure_started(crypto).

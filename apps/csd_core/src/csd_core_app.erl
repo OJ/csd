@@ -10,7 +10,7 @@
 %% ===================================================================
 
 start(_StartType, _StartArgs) ->
-    csd_core_sup:start_link().
+    pooler:start_link().
 
 stop(_State) ->
     ok.

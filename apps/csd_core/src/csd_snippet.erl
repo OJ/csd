@@ -1,6 +1,12 @@
 -module(csd_snippet).
 -author('OJ Reeves <oj@buffered.io>').
 
+-define(BUCKET, <<"snippet">>).
+
+%% --------------------------------------------------------------------------------------
+%% API Function Exports
+%% --------------------------------------------------------------------------------------
+
 -export([to_snippet/3,
     to_snippet/4,
     to_json/1,
@@ -14,13 +20,19 @@
     get_key/1,
     set_key/2]).
 
--define(BUCKET, <<"snippet">>).
+%% --------------------------------------------------------------------------------------
+%% Internal Record Definitions
+%% --------------------------------------------------------------------------------------
 
 -record(snippet, {
     user_id,
     key,
     data
   }).
+
+%% --------------------------------------------------------------------------------------
+%% API Function Definitions
+%% --------------------------------------------------------------------------------------
 
 to_snippet(Title, Left, Right) ->
   to_snippet(Title, Left, Right, undefined).
@@ -40,15 +52,15 @@ to_snippet(Title, Left, Right, UserId) ->
   }.
 
 list_for_user(UserId) ->
-  csd_core_server:list_snippets(UserId).
+  csd_db:list_snippets(UserId).
 
 fetch(SnippetKey) when is_list(SnippetKey) ->
   fetch(list_to_binary(SnippetKey));
 fetch(SnippetKey) when is_binary(SnippetKey) ->
-  csd_core_server:get_snippet(SnippetKey).
+  csd_db:get_snippet(SnippetKey).
 
 save(Snippet=#snippet{}) ->
-  csd_core_server:save_snippet(Snippet).
+  csd_db:save_snippet(Snippet).
 
 get_data(#snippet{data=Data}) ->
   Data.
@@ -79,8 +91,13 @@ from_json(SnippetJson) ->
     data = Data
   }.
 
+%% --------------------------------------------------------------------------------------
+%% Private Function Definitions
+%% --------------------------------------------------------------------------------------
+
 is_string(title) -> true;
 is_string(left) -> true;
 is_string(right) -> true;
 is_string(created) -> true;
 is_string(_) -> false.
+
