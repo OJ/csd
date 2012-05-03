@@ -1,5 +1,15 @@
 -module(csd_json).
+-author('OJ Reeves <oj@buffered.io>').
+
+%% --------------------------------------------------------------------------------------
+%% API Function Exports
+%% --------------------------------------------------------------------------------------
+
 -export([from_json/1, from_json/2, to_json/1, to_json/2]).
+
+%% --------------------------------------------------------------------------------------
+%% API Function Definitions
+%% --------------------------------------------------------------------------------------
 
 to_json(PropList) ->
   to_json(PropList, fun(_) -> true end).
@@ -12,6 +22,10 @@ from_json(Json) ->
 
 from_json(Json, IsStrFun) ->
   to_proplist(mochijson2:decode(Json), IsStrFun).
+
+%% --------------------------------------------------------------------------------------
+%% Private Function Definitions
+%% --------------------------------------------------------------------------------------
 
 from_proplist(List=[H|_], IsStrFun) when is_tuple(H) ->
   { struct, lists:map(fun(P) -> from_proplist(P, IsStrFun) end, List) };
@@ -47,3 +61,4 @@ from_value(PropName, B, IsStrFun) when is_binary(B) ->
   end;
 from_value(_, V, _) ->
   V.
+

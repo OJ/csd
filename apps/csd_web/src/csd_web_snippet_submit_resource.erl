@@ -1,35 +1,50 @@
 -module(csd_web_snippet_submit_resource).
 -author('OJ Reeves <oj@buffered.io>').
 
--export([init/1,
+%% --------------------------------------------------------------------------------------
+%% API Function Exports
+%% --------------------------------------------------------------------------------------
+
+-export([
+    init/1,
     allowed_methods/2,
     content_types_accepted/2,
     is_authorized/2,
     process_form/2,
     post_is_create/2,
-    create_path/2,
-    to_html/2
+    create_path/2
   ]).
+
+%% --------------------------------------------------------------------------------------
+%% Internal Record Definitions
+%% --------------------------------------------------------------------------------------
 
 -record(state, {
     user_data = undefined,
     key
   }).
 
+%% --------------------------------------------------------------------------------------
+%% Required Includes
+%% --------------------------------------------------------------------------------------
+
 -include_lib("webmachine/include/webmachine.hrl").
+
+%% --------------------------------------------------------------------------------------
+%% API Function Definitions
+%% --------------------------------------------------------------------------------------
 
 init([]) ->
   {ok, #state{}}.
 
 content_types_accepted(ReqData, State=#state{}) ->
   Types = [
-    {"text/html", to_html},
     {"application/x-www-form-urlencoded", process_form}
   ],
   {Types, ReqData, State}.
 
 allowed_methods(ReqData, State=#state{}) ->
-  {['GET', 'POST'], ReqData, State}.
+  {['POST'], ReqData, State}.
 
 is_authorized(ReqData, State=#state{}) ->
   case cookie:load_auth(ReqData) of
@@ -54,16 +69,15 @@ process_form(ReqData, State=#state{}) ->
   Snippet = to_snippet(FormData, State),
   {ok, SavedSnippet} = csd_snippet:save(Snippet),
   Key = csd_snippet:get_key(SavedSnippet),
-  NewReqData = wrq:set_resp_header("Content-type", "text/plain", wrq:set_resp_body(Key, ReqData)),
+
+  % Return the key of the snippet as the payload
+  NewBody = wrq:set_resp_body(Key, ReqData),
+  NewReqData = wrq:set_resp_header("Content-type", "text/plain", NewBody),
   {true, NewReqData, State}.
 
-to_html(ReqData, State=#state{}) ->
-  TemplateData = [
-    % post back to the same URL
-    {post_url, wrq:path(ReqData)}
-  ],
-  {ok, Content} = snippet_submit_dtl:render(TemplateData),
-  {Content, ReqData, State}.
+%% --------------------------------------------------------------------------------------
+%% Private Function Definitions
+%% --------------------------------------------------------------------------------------
 
 to_snippet(FormData, #state{key=Key, user_data={UserId, _, _, _}}) ->
   Title = proplists:get_value("title", FormData),

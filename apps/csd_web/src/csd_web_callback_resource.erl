@@ -1,13 +1,21 @@
-%% @author OJ Reeves <oj@buffered.io>
-%% @copyright 2012 OJ Reeves
-
 -module(csd_web_callback_resource).
-
 -author('OJ Reeves <oj@buffered.io>').
+
+%% --------------------------------------------------------------------------------------
+%% API Function Exports
+%% --------------------------------------------------------------------------------------
 
 -export([init/1, resource_exists/2, previously_existed/2, moved_temporarily/2]).
 
+%% --------------------------------------------------------------------------------------
+%% Required Includes
+%% --------------------------------------------------------------------------------------
+
 -include_lib("webmachine/include/webmachine.hrl").
+
+%% --------------------------------------------------------------------------------------
+%% API Function Definitions
+%% --------------------------------------------------------------------------------------
 
 init([]) ->
   {ok, undefined}.
@@ -19,9 +27,6 @@ previously_existed(ReqData, State) ->
   {true, ReqData, State}.
 
 moved_temporarily(ReqData, State) ->
-  handle_callback(ReqData, State).
-
-handle_callback(ReqData, State) ->
   ReqToken = wrq:get_qs_value("oauth_token", ReqData),
   ReqTokenSecret = wrq:get_qs_value("oauth_token_secret", ReqData),
   Verifier = wrq:get_qs_value("oauth_verifier", ReqData),

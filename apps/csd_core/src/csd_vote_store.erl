@@ -1,8 +1,6 @@
 -module(csd_vote_store).
 -author('OJ Reeves <oj@buffered.io>').
 
--export([fetch/2, save/2, count_for_snippet/2, count_for_snippet/3]).
-
 -define(BUCKET, <<"vote">>).
 -define(SNIPPET_INDEX, <<"snippetid">>).
 -define(USER_INDEX, <<"userid">>).
@@ -10,6 +8,16 @@
 -define(COUNT_SNIP_RED_JS, <<"function(vals,arg){if(vals.length===0){return[[0,0]];}return[vals.reduce(function(a,v){return[a[0]+v[0],a[1]+v[1]];})];}">>).
 -define(COUNT_SNIP_USER_MAP_JS, <<"function(v,k,a){var d=Riak.mapValuesJson(v)[0];var which=d.user_id===a?d.which:\"\";if(d.which===\"left\"){return[[1,0,which]];}return[[0,1,which]];}">>).
 -define(COUNT_SNIP_USER_RED_JS, <<"function(vals,arg){if(vals.length===0){return[[0,0,\"\"]];}return[vals.reduce(function(a,v){return[a[0]+v[0],a[1]+v[1],a[2].length>0?a[2]:v[2]];})];}">>).
+
+%% --------------------------------------------------------------------------------------
+%% API Function Exports
+%% --------------------------------------------------------------------------------------
+
+-export([fetch/2, save/2, count_for_snippet/2, count_for_snippet/3]).
+
+%% --------------------------------------------------------------------------------------
+%% API Function Definitions
+%% --------------------------------------------------------------------------------------
 
 fetch(RiakPid, VoteId) ->
   case csd_riak:fetch(RiakPid, ?BUCKET, VoteId) of
@@ -58,3 +66,4 @@ save(RiakPid, Vote) ->
       ok = csd_riak:save(RiakPid, NewRiakObj),
       {ok, Vote}
   end.
+

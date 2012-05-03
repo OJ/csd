@@ -1,12 +1,5 @@
-%% @author OJ Reeves <oj@buffered.io>
-%% @copyright 2012 OJ Reeves
-
 -module(cookie).
-
 -author('OJ Reeves <oj@buffered.io>').
-
--export([auth_required_json/0]).
--export([load_auth/1, store_auth/5]).
 
 -define(AUTH_COOKIE, "__CodeSmackdown_Auth").
 -define(AUTH_SALT, "27ed2d041cdb4b8b2702").
@@ -16,6 +9,17 @@
 -define(ENC_KEY,
   <<110,56,121,28,235,159,77,154,160,5,130,210,204,32,26,224,255,86,101,71,61,3,
   66,69,30,39,42,0,116,93,204,99>>).
+
+%% --------------------------------------------------------------------------------------
+%% API Function Exports
+%% --------------------------------------------------------------------------------------
+
+-export([auth_required_json/0]).
+-export([load_auth/1, store_auth/5]).
+
+%% --------------------------------------------------------------------------------------
+%% API Function Definitions
+%% --------------------------------------------------------------------------------------
 
 auth_required_json() ->
   Json = {struct, {"error", "unauthorized"}},
@@ -40,6 +44,10 @@ store_auth(ReqData, Id, Name, Token, TokenSecret) ->
   ],
   CookieHeader = mochiweb_cookies:cookie(?AUTH_COOKIE, Value, Options),
   wrq:merge_resp_headers([CookieHeader], ReqData).
+
+%% --------------------------------------------------------------------------------------
+%% Private Function Definitions
+%% --------------------------------------------------------------------------------------
 
 decode(CookieValue) ->
   {Value={Id, Name, Expire, SecretInfo}, Salt, Sign} = binary_to_term(base64:decode(CookieValue)),
@@ -72,3 +80,4 @@ encrypt(Value) ->
 decrypt(Value) ->
   [V, ?AUTH_SALT] = binary_to_term(crypto:aes_ctr_decrypt(?ENC_KEY, ?ENC_IV, Value)),
   V.
+

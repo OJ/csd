@@ -1,9 +1,17 @@
 -module(csd_user_store).
 -author('OJ Reeves <oj@buffered.io>').
 
+-define(BUCKET, <<"user">>).
+
+%% --------------------------------------------------------------------------------------
+%% API Function Exports
+%% --------------------------------------------------------------------------------------
+
 -export([fetch/2, save/2]).
 
--define(BUCKET, <<"user">>).
+%% --------------------------------------------------------------------------------------
+%% API Function Definitions
+%% --------------------------------------------------------------------------------------
 
 fetch(RiakPid, UserId) when is_integer(UserId) ->
   fetch(RiakPid, integer_to_list(UserId));
@@ -34,3 +42,4 @@ save(RiakPid, User) ->
       ok = csd_riak:save(RiakPid, NewRiakObj),
       {ok, User}
   end.
+

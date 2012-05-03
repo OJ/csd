@@ -1,19 +1,15 @@
-%% @author OJ Reeves <oj@buffered.io>
-%% @copyright 2012 OJ Reeves.
-
-%% @doc csd_web startup code
-
 -module(csd_web).
 -author('OJ Reeves <oj@buffered.io>').
+
+%% --------------------------------------------------------------------------------------
+%% API Function Exports
+%% --------------------------------------------------------------------------------------
+
 -export([start/0, start_link/0, stop/0]).
 
-ensure_started(App) ->
-  case application:start(App) of
-    ok ->
-      ok;
-    {error, {already_started, App}} ->
-      ok
-  end.
+%% --------------------------------------------------------------------------------------
+%% API Function Definitions
+%% --------------------------------------------------------------------------------------
 
 %% @spec start_link() -> {ok,Pid::pid()}
 %% @doc Starts the app for inclusion in a supervisor tree
@@ -39,6 +35,10 @@ stop() ->
   application:stop(inets),
   Res.
 
+%% --------------------------------------------------------------------------------------
+%% Privae Function Definitions
+%% --------------------------------------------------------------------------------------
+
 start_common() ->
   ensure_started(inets),
   ensure_started(crypto),
@@ -48,3 +48,12 @@ start_common() ->
   application:set_env(webmachine, webmachine_logger_module, webmachine_logger),
   ensure_started(webmachine),
   ok.
+
+ensure_started(App) ->
+  case application:start(App) of
+    ok ->
+      ok;
+    {error, {already_started, App}} ->
+      ok
+  end.
+

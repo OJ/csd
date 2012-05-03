@@ -1,11 +1,15 @@
-%% @author OJ Reeves <oj@buffered.io>
-%% @copyright 2012 OJ Reeves
-
 -module(twitter).
-
 -author('OJ Reeves <oj@buffered.io>').
 
+%% --------------------------------------------------------------------------------------
+%% API Function Exports
+%% --------------------------------------------------------------------------------------
+
 -export([request_access/0, verify_access/3, get_current_user_info/2]).
+
+%% --------------------------------------------------------------------------------------
+%% API Function Definitions
+%% --------------------------------------------------------------------------------------
 
 request_access() ->
   TwitterConf = conf:get_section(twitter),
@@ -29,6 +33,10 @@ verify_access(RequestToken, RequestTokenSecret, Verifier) ->
 get_current_user_info(AccessToken, AccessTokenSecret) ->
   call_json_service(current_user_info_url, AccessToken, AccessTokenSecret).
 
+%% --------------------------------------------------------------------------------------
+%% Private Function Definitions
+%% --------------------------------------------------------------------------------------
+
 %% Extract a oauth-formatted consumer tuple from the given Twitter configuration.
 consumer(TwitterConf) ->
   ConsumerKey = proplists:get_value(consumer_key, TwitterConf),
@@ -42,3 +50,4 @@ call_json_service(UrlKey, AccessToken, AccessTokenSecret) ->
   {ok, Response} = oauth:get(Url, [], consumer(TwitterConf), AccessToken, AccessTokenSecret),
   {{_Version, 200, "OK"}, _Headers, Json} = Response,
   {ok, Json}.
+
