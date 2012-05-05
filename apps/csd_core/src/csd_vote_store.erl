@@ -30,19 +30,21 @@ fetch(RiakPid, VoteId) ->
   end.
 
 count_for_snippet(RiakPid, SnippetId) ->
-  Index = csd_riak:get_mapred_phase_input_index(?BUCKET, bin, ?SNIPPET_INDEX, SnippetId),
-  Map = csd_riak:get_mapred_phase_map_js(?COUNT_SNIP_MAP_JS, false),
-  Count = csd_riak:get_mapred_phase_reduce_js(?COUNT_SNIP_RED_JS),
-  case csd_riak:mapred(RiakPid, Index, [Map, Count]) of
+  MR1 = csd_riak_mr:add_input_index(csd_riak_mr:create(), ?BUCKET, bin,
+    ?SNIPPET_INDEX, SnippetId),
+  MR2 = csd_riak_mr:add_map_js(MR1, ?COUNT_SNIP_MAP_JS, false),
+  MR3 = csd_riak_mr:add_reduce_js(MR2, ?COUNT_SNIP_RED_JS),
+  case csd_riak_mr:run(RiakPid, MR3) of
     {ok, [{1, [[Left, Right]]}]} -> {ok, {Left, Right}};
     Error -> Error
   end.
 
 count_for_snippet(RiakPid, SnippetId, UserId) ->
-  Index = csd_riak:get_mapred_phase_input_index(?BUCKET, bin, ?SNIPPET_INDEX, SnippetId),
-  Map = csd_riak:get_mapred_phase_map_js(?COUNT_SNIP_USER_MAP_JS, false, UserId),
-  Count = csd_riak:get_mapred_phase_reduce_js(?COUNT_SNIP_USER_RED_JS),
-  case csd_riak:mapred(RiakPid, Index, [Map, Count]) of
+  MR1 = csd_riak_mr:add_input_index(csd_riak_mr:create(), ?BUCKET, bin,
+    ?SNIPPET_INDEX, SnippetId),
+  MR2 = csd_riak_mr:add_map_js(MR1, ?COUNT_SNIP_USER_MAP_JS, false, UserId),
+  MR3 = csd_riak_mr:add_reduce_js(MR2, ?COUNT_SNIP_USER_RED_JS),
+  case csd_riak_mr:run(RiakPid, MR3) of
     {ok, [{1, [[Left, Right, Which]]}]} -> {ok, {Left, Right, Which}};
     Error -> Error
   end.

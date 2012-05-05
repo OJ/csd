@@ -31,17 +31,14 @@
 %% --------------------------------------------------------------------------------------
 
 init([]) ->
-  io:format("init~n", []),
   {ok, #state{}}.
 
 allowed_methods(ReqData, State=#state{}) ->
-  io:format("allowed~n", []),
   {['POST'], ReqData, State}.
 
 is_authorized(ReqData, State=#state{}) ->
   case cookie:load_auth(ReqData) of
     {ok, UserData} ->
-      io:format("auth~n", []),
       {true, ReqData, State#state{user_data=UserData}};
     _ ->
       {false, ReqData, State}

@@ -63,7 +63,6 @@ create_path(ReqData, State=#state{}) ->
   {Path, ReqData, State#state{key=Key}}.
 
 process_form(ReqData, State=#state{}) ->
-  io:format("~p~n", [wrq:host_tokens(ReqData)]),
   % get the detail from the form
   FormData = mochiweb_util:parse_qs(wrq:req_body(ReqData)),
   Snippet = to_snippet(FormData, State),

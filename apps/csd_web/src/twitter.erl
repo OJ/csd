@@ -16,7 +16,6 @@ request_access() ->
   RequestTokenUrl = proplists:get_value(request_token_url, TwitterConf),
   {ok, RequestResponse} = oauth:get(RequestTokenUrl, [], consumer(TwitterConf)),
   RequestParams = oauth:params_decode(RequestResponse),
-  io:format("got here~n", []),
   RequestToken = oauth:token(RequestParams),
   AuthenticateUrl = proplists:get_value(authenticate_url, TwitterConf),
   {ok, oauth:uri(AuthenticateUrl, [{"oauth_token", RequestToken}])}.

@@ -1,11 +1,16 @@
 -module(csd_riak).
 -author('OJ Reeves <oj@buffered.io>').
 
+-define(INDEX_KEY, <<"index">>).
+-define(INDEX_SUFFIX_INT, <<"_int">>).
+-define(INDEX_SUFFIX_BIN, <<"_bin">>).
+
 %% ------------------------------------------------------------------
 %% API Function Exports
 %% ------------------------------------------------------------------
 
--export([connect/1,
+-export([
+    connect/1,
     create/3,
     create/4,
     fetch/3,
@@ -15,23 +20,10 @@
     get_index/3,
     set_index/4,
     set_indexes/2,
-    mapred/3,
-    get_mapred_phase_input_index/4,
-    get_mapred_phase_map_js/1,
-    get_mapred_phase_map_js/2,
-    get_mapred_phase_map_js/3,
-    get_mapred_phase_reduce_js/1,
-    get_mapred_phase_reduce_js/2,
-    get_mapred_phase_reduce_js/3,
-    get_mapred_reduce_sort_js/1,
-    get_mapred_reduce_sort_js/2,
+    index/2,
     new_key/0,
     new_key/1
   ]).
-
--define(INDEX_KEY, <<"index">>).
--define(INDEX_SUFFIX_INT, <<"_int">>).
--define(INDEX_SUFFIX_BIN, <<"_bin">>).
 
 %% ------------------------------------------------------------------
 %% API Function Definitions
@@ -126,58 +118,6 @@ save(RiakPid, RiakObj) ->
   Result = riakc_pb_socket:put(RiakPid, RiakObj),
   Result.
 
-%% @doc Executes a map/reduce of the given Phases job over the Inputs.
-mapred(RiakPid, Input, Phases) when is_list(Phases) ->
-  Result = riakc_pb_socket:mapred(RiakPid, Input, Phases),
-  Result.
-
-%% @doc Creates a map/reduce Input phase for a secondary index input.
-get_mapred_phase_input_index(Bucket, Type, Index, Value) when is_integer(Value) ->
-  get_mapred_phase_input_index(Bucket, Type, Index, integer_to_list(Value));
-get_mapred_phase_input_index(Bucket, Type, Index, Value) when is_list(Value) ->
-  get_mapred_phase_input_index(Bucket, Type, Index, list_to_binary(Value));
-get_mapred_phase_input_index(Bucket, Type, Index, Value) when is_binary(Value) ->
-  {index, Bucket, index(Type, Index), Value}.
-
-%% @doc Creates a map/reduce Map phase from raw JS source. This overload
-%%      defaults Keep to true and Arg to none.
-get_mapred_phase_map_js(JsSource) ->
-  get_mapred_phase_map_js(JsSource, true).
-
-%% @doc Creates a map/reduce Map phase from raw JS source. This overload
-%%      defaults Arg to none.
-get_mapred_phase_map_js(JsSource, Keep) ->
-  get_mapred_phase_map_js(JsSource, Keep, none).
-
-%% @doc Creates a map/reduce Map phase from raw JS source.
-get_mapred_phase_map_js(JsSource, Keep, Arg) ->
-  {map, {jsanon, JsSource}, Arg, Keep}.
-
-%% @doc Creates a map/reduce Reduce phase from raw JS source. This overload
-%%      defaults Keep to true and Arg to none.
-get_mapred_phase_reduce_js(JsSource) ->
-  get_mapred_phase_reduce_js(JsSource, true).
-
-%% @doc Creates a map/reduce Reduce phase from raw JS source. This overload
-%%      defaults Keep to true.
-get_mapred_phase_reduce_js(JsSource, Keep) ->
-  get_mapred_phase_reduce_js(JsSource, Keep, none).
-
-%% @doc Creates a map/reduce Reduce phase from raw JS source.
-get_mapred_phase_reduce_js(JsSource, Keep, Arg) ->
-  {reduce, {jsanon, JsSource}, Arg, Keep}.
-
-%% @doc Creates a map/reduce Reduce sort phase using Riak's built in sort function
-%%      using the specified comparison function written in raw JS. This overload
-%%      defaults Keep to true.
-get_mapred_reduce_sort_js(CompareFun) ->
-  get_mapred_reduce_sort_js(CompareFun, true).
-
-%% @doc Creates a map/reduce Reduce sort phase using Riak's built in sort function
-%%      using the specified comparison function written in raw JS.
-get_mapred_reduce_sort_js(CompareFun, Keep) ->
-  {reduce, {jsfun, <<"Riak.reduceSort">>}, CompareFun, Keep}.
-
 %% @spec new_key() -> key()
 %% @doc Generate an close-to-unique key that can be used to identify
 %%      an object in riak. This implementation is blatantly borrowed
@@ -195,14 +135,15 @@ new_key(List) ->
   Hash = erlang:phash2(List),
   base64:encode(<<Hash:32>>).
 
-%% ------------------------------------------------------------------
-%% Private Function Definitions
-%% ------------------------------------------------------------------
-
+%% @doc Create an index of a given name based on the type.
 index(int, Name) ->
   iolist_to_binary([Name, ?INDEX_SUFFIX_INT]);
 index(bin, Name) ->
   iolist_to_binary([Name, ?INDEX_SUFFIX_BIN]).
+
+%% ------------------------------------------------------------------
+%% Private Function Definitions
+%% ------------------------------------------------------------------
 
 value(V) when is_list(V) ->
   list_to_binary(V);

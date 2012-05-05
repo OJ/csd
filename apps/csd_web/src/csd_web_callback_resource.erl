@@ -39,7 +39,6 @@ moved_temporarily(ReqData, State) ->
   NewReqData = cookie:store_auth(ReqData, UserId, UserName, AccessToken, AccessTokenSecret),
 
   User = csd_user:to_user(UserId, UserName),
-  %io:format("~p~n", [User]),
   {ok, _} = csd_user:save(User),
 
   % TODO: error handlng for when things don't go to plan
