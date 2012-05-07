@@ -5,7 +5,14 @@
 %% API Function Exports
 %% --------------------------------------------------------------------------------------
 
--export([get_id/1, fetch/1, save/1, to_user/2, from_json/1, to_json/1]).
+-export([
+    get_id/1,
+    get_name/1,
+    fetch/1,
+    save/1,
+    to_user/2,
+    from_json/1,
+    to_json/1]).
 
 %% --------------------------------------------------------------------------------------
 %% Internal Record Definitions
@@ -31,6 +38,9 @@ to_user(Id, Name) ->
 get_id(#user{id=Id}) ->
   Id.
 
+get_name(#user{name=Name}) ->
+  Name.
+
 fetch(Id) ->
   csd_db:get_user(Id).
 
@@ -43,9 +53,9 @@ to_json(#user{name=N, id=T, joined=J}) ->
 from_json(UserJson) ->
   User = csd_json:from_json(UserJson, fun is_string/1),
   #user{
-    id = proplists:get_value(User, id),
-    name = proplists:get_value(User, name),
-    joined = proplists:get_value(User, joined)
+    id = proplists:get_value(id, User),
+    name = proplists:get_value(name, User),
+    joined = proplists:get_value(joined, User)
   }.
 
 %% --------------------------------------------------------------------------------------

@@ -1,24 +1,22 @@
 -module(csd_snippet).
 -author('OJ Reeves <oj@buffered.io>').
 
--define(BUCKET, <<"snippet">>).
-
 %% --------------------------------------------------------------------------------------
 %% API Function Exports
 %% --------------------------------------------------------------------------------------
 
--export([to_snippet/3,
+-export([
     to_snippet/4,
     to_json/1,
     from_json/1,
     list_for_user/1,
     fetch/1,
     save/1,
-    get_data/1,
     set_user_id/2,
     get_user_id/1,
     get_key/1,
-    set_key/2]).
+    set_key/2
+  ]).
 
 %% --------------------------------------------------------------------------------------
 %% Internal Record Definitions
@@ -27,28 +25,24 @@
 -record(snippet, {
     user_id,
     key,
-    data
+    title,
+    left,
+    right,
+    created
   }).
 
 %% --------------------------------------------------------------------------------------
 %% API Function Definitions
 %% --------------------------------------------------------------------------------------
 
-to_snippet(Title, Left, Right) ->
-  to_snippet(Title, Left, Right, undefined).
-
 to_snippet(Title, Left, Right, UserId) ->
-  Key = csd_riak:new_key(),
   #snippet{
-    data = [
-      {key, Key},
-      {title, Title},
-      {left, Left},
-      {right, Right},
-      {created, csd_date:utc_now()}
-    ],
     user_id = UserId,
-    key = Key
+    key = csd_riak:new_key(),
+    title = Title,
+    left = Left,
+    right = Right,
+    created = csd_date:utc_now()
   }.
 
 list_for_user(UserId) ->
@@ -62,9 +56,6 @@ fetch(SnippetKey) when is_binary(SnippetKey) ->
 save(Snippet=#snippet{}) ->
   csd_db:save_snippet(Snippet).
 
-get_data(#snippet{data=Data}) ->
-  Data.
-
 set_user_id(Snippet=#snippet{}, UserId) ->
   Snippet#snippet{
     user_id = UserId
@@ -76,19 +67,29 @@ get_user_id(#snippet{user_id=UserId}) ->
 get_key(#snippet{key=Key}) ->
   Key.
 
-set_key(Snippet=#snippet{data=Data}, NewKey) ->
+set_key(Snippet=#snippet{}, NewKey) ->
   Snippet#snippet{
-    key = NewKey,
-    data = dict:to_list(dict:store(key, NewKey, dict:from_list(Data)))
+    key = NewKey
   }.
 
-to_json(#snippet{data=Data}) ->
+to_json(#snippet{key=K, title=T, left=L, right=R, created=C}) ->
+  Data = [
+    {key, K},
+    {title, T},
+    {left, L},
+    {right, R},
+    {created, C}
+  ],
   csd_json:to_json(Data, fun is_string/1).
 
 from_json(SnippetJson) ->
   Data = csd_json:from_json(SnippetJson, fun is_string/1),
   #snippet{
-    data = Data
+    key = proplists:get_value(key, Data),
+    title = proplists:get_value(title, Data),
+    left = proplists:get_value(left, Data),
+    right = proplists:get_value(right, Data),
+    created = proplists:get_value(created, Data)
   }.
 
 %% --------------------------------------------------------------------------------------
