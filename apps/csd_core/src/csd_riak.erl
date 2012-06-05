@@ -103,7 +103,12 @@ set_indexes(RiakObj, Indexes) ->
 get_index(RiakObj, Type, Name) ->
   Meta = riakc_obj:get_metadata(RiakObj),
   Indexes = dict:fetch(?INDEX_KEY, Meta),
-  proplists:get_value(index(Type, Name), Indexes).
+  IndexKey = binary_to_list(index(Type, Name)),
+  Value = proplists:get_value(IndexKey, Indexes),
+  case Type of
+    int -> list_to_integer(Value);
+    bin -> Value
+  end.
 
 %% @spec get_value(riakc_obj()) -> term()
 %% @doc Retrieves the stored value from within the riakc
