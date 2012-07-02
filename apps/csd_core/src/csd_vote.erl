@@ -52,7 +52,7 @@ count_for_snippet(SnippetId) ->
   {ok, #count{
     left = L,
     right = R,
-    which = ""
+    which = <<>>
   }}.
 
 count_for_snippet(SnippetId, UserId) ->
