@@ -4,10 +4,10 @@
 -define(BUCKET, <<"vote">>).
 -define(SNIPPET_INDEX, <<"snippetid">>).
 -define(USER_INDEX, <<"userid">>).
--define(COUNT_SNIP_MAP_JS, <<"function(v){var d=Riak.mapValuesJson(v)[0];if(d.which===\"left\"){return[[1,0]];}return[[0,1]];}">>).
--define(COUNT_SNIP_RED_JS, <<"function(vals,arg){if(vals.length===0){return[[0,0]];}return[vals.reduce(function(a,v){return[a[0]+v[0],a[1]+v[1]];})];}">>).
--define(COUNT_SNIP_USER_MAP_JS, <<"function(v,k,a){var d=Riak.mapValuesJson(v)[0];var which=d.user_id===a?d.which:\"\";if(d.which===\"left\"){return[[1,0,which]];}return[[0,1,which]];}">>).
--define(COUNT_SNIP_USER_RED_JS, <<"function(vals,arg){if(vals.length===0){return[[0,0,\"\"]];}return[vals.reduce(function(a,v){return[a[0]+v[0],a[1]+v[1],a[2].length>0?a[2]:v[2]];})];}">>).
+-define(COUNT_VOTE_MAP_JS, <<"function(v){var d=Riak.mapValuesJson(v)[0];if(d.which===\"left\"){return[[1,0]];}return[[0,1]];}">>).
+-define(COUNT_VOTE_RED_JS, <<"function(vals,arg){if(vals.length===0){return[[0,0]];}return[vals.reduce(function(a,v){return[a[0]+v[0],a[1]+v[1]];})];}">>).
+-define(COUNT_VOTE_USER_MAP_JS, <<"function(v,k,a){var d=Riak.mapValuesJson(v)[0];var which=d.user_id===a?d.which:\"\";if(d.which===\"left\"){return[[1,0,which]];}return[[0,1,which]];}">>).
+-define(COUNT_VOTE_USER_RED_JS, <<"function(vals,arg){if(vals.length===0){return[[0,0,\"\"]];}return[vals.reduce(function(a,v){return[a[0]+v[0],a[1]+v[1],a[2].length>0?a[2]:v[2]];})];}">>).
 
 %% --------------------------------------------------------------------------------------
 %% API Function Exports
@@ -32,8 +32,8 @@ fetch(RiakPid, VoteId) ->
 count_for_snippet(RiakPid, SnippetId) ->
   MR1 = csd_riak_mr:add_input_index(csd_riak_mr:create(), ?BUCKET, bin,
     ?SNIPPET_INDEX, SnippetId),
-  MR2 = csd_riak_mr:add_map_js(MR1, ?COUNT_SNIP_MAP_JS, false),
-  MR3 = csd_riak_mr:add_reduce_js(MR2, ?COUNT_SNIP_RED_JS),
+  MR2 = csd_riak_mr:add_map_js(MR1, ?COUNT_VOTE_MAP_JS, false),
+  MR3 = csd_riak_mr:add_reduce_js(MR2, ?COUNT_VOTE_RED_JS),
   case csd_riak_mr:run(RiakPid, MR3) of
     {ok, [{1, [[Left, Right]]}]} -> {ok, {Left, Right}};
     Error -> Error
@@ -42,8 +42,8 @@ count_for_snippet(RiakPid, SnippetId) ->
 count_for_snippet(RiakPid, SnippetId, UserId) ->
   MR1 = csd_riak_mr:add_input_index(csd_riak_mr:create(), ?BUCKET, bin,
     ?SNIPPET_INDEX, SnippetId),
-  MR2 = csd_riak_mr:add_map_js(MR1, ?COUNT_SNIP_USER_MAP_JS, false, UserId),
-  MR3 = csd_riak_mr:add_reduce_js(MR2, ?COUNT_SNIP_USER_RED_JS),
+  MR2 = csd_riak_mr:add_map_js(MR1, ?COUNT_VOTE_USER_MAP_JS, false, UserId),
+  MR3 = csd_riak_mr:add_reduce_js(MR2, ?COUNT_VOTE_USER_RED_JS),
   case csd_riak_mr:run(RiakPid, MR3) of
     {ok, [{1, [[Left, Right, Which]]}]} -> {ok, {Left, Right, Which}};
     Error -> Error
