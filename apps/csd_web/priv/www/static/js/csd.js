@@ -35,7 +35,7 @@
         return false;
       }
 
-      field.parent().parent().removeClass('error').addClass('success');
+      field.parent().parent().removeClass('error');
       return true;
     },
 
@@ -293,13 +293,25 @@
       window.prettyPrint && prettyPrint();
     },
 
+    logout: function() {
+      self = this;
+      $.post("/logoff", function() {
+        location.reload();
+      });
+    },
+
     login: function() {
-      var view = new LoginView();
-      this.setView(view, "Login");
+      if(!this.isUserSignedIn())
+      {
+        var view = new LoginView();
+        this.setView(view, "Login");
+      } else {
+        this.home();
+      }
     },
 
     home: function() {
-      if(!!this.currentUserId) {
+      if(this.isUserSignedIn()) {
         this.navigate('user/' + this.currentUserId, {trigger: true, replace: true});
       } else {
         this.navigate('login', {trigger: true, replace: true});
@@ -336,7 +348,7 @@
     cache: {},
 
     loadTemplate: function(name) {
-      var url = "/static/views/" + name + ".handlebars";
+      var url = "/views/" + name + ".handlebars";
       var template = $.ajax({url: url, async: false}).responseText;
       return Handlebars.compile(template);
     },
@@ -361,6 +373,11 @@
       router = this;
 
       Backbone.history.start();
+
+      $(".logout").click(function(e) {
+        e.preventDefault();
+        router.logout();
+      });
 
       var hash = window.location.hash;
       if(hash === '' || hash === '#') {

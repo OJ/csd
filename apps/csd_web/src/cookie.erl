@@ -15,7 +15,7 @@
 %% --------------------------------------------------------------------------------------
 
 -export([auth_required_json/0]).
--export([load_auth/1, store_auth/5]).
+-export([load_auth/1, remove_auth/1, store_auth/5]).
 
 %% --------------------------------------------------------------------------------------
 %% API Function Definitions
@@ -24,6 +24,9 @@
 auth_required_json() ->
   Json = {struct, {"error", "unauthorized"}},
   mochijson2:encode(Json).
+
+remove_auth(ReqData) ->
+  store_auth_cookie(ReqData, "", -1).
 
 load_auth(ReqData) ->
   case wrq:get_cookie_value(?AUTH_COOKIE, ReqData) of
@@ -36,18 +39,21 @@ load_auth(ReqData) ->
 
 store_auth(ReqData, Id, Name, Token, TokenSecret) ->
   Value = mochiweb_util:quote_plus(encode(Id, Name, Token, TokenSecret)),
+  store_auth_cookie(ReqData, Value, 3600 * 24 * ?AUTH_EXPIRY_DAYS).
+
+%% --------------------------------------------------------------------------------------
+%% Private Function Definitions
+%% --------------------------------------------------------------------------------------
+
+store_auth_cookie(ReqData, Value, Expiry) ->
   Options = [
     %{domain, "codesmackdown.com"},
-    {max_age, 3600 * 24 * ?AUTH_EXPIRY_DAYS},
+    {max_age, Expiry},
     {path, "/"},
     {http_only, true}
   ],
   CookieHeader = mochiweb_cookies:cookie(?AUTH_COOKIE, Value, Options),
   wrq:merge_resp_headers([CookieHeader], ReqData).
-
-%% --------------------------------------------------------------------------------------
-%% Private Function Definitions
-%% --------------------------------------------------------------------------------------
 
 decode(CookieValue) ->
   {Value={Id, Name, Expire, SecretInfo}, Salt, Sign} = binary_to_term(base64:decode(CookieValue)),
