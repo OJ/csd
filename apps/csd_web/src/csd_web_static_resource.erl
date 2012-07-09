@@ -1,4 +1,4 @@
--module(csd_static_resource).
+-module(csd_web_static_resource).
 -author('OJ Reeves <oj@buffered.io>').
 
 %% --------------------------------------------------------------------------------------
