@@ -21,7 +21,7 @@
 %% --------------------------------------------------------------------------------------
 
 init([]) ->
-  {{trace, "/tmp"}, undefined}.
+  {ok, undefined}.
 
 allowed_methods(ReqData, State) ->
   {['POST'], ReqData, State}.
