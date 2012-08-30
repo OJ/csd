@@ -103,8 +103,8 @@ set_indexes(RiakObj, Indexes) ->
 get_index(RiakObj, Type, Name) ->
   Meta = riakc_obj:get_metadata(RiakObj),
   Indexes = dict:fetch(?INDEX_KEY, Meta),
-  IndexKey = binary_to_list(index(Type, Name)),
-  Value = proplists:get_value(IndexKey, Indexes),
+  IndexKey = index(Type, Name),
+  Value = binary_to_list(proplists:get_value(IndexKey, Indexes)),
   case Type of
     int -> list_to_integer(Value);
     bin -> Value
