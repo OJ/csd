@@ -96,7 +96,7 @@ set_indexes(RiakObj, Indexes) ->
   NewIndex = dict:to_list(UpdatedIndexes),
   riakc_obj:update_metadata(RiakObj, dict:store(?INDEX_KEY, NewIndex, Meta)).
 
-%% @spec get_index_int(riakc_obj(), string) -> int
+%% @spec get_index_int(riakc_obj(), (int|bin), string) -> (int|bin)
 %% @doc Queries the object meta data to pull out an index of
 %%      integer type. Assumes that the index exists, expect
 %%      failure when querying when metadata/index missing.

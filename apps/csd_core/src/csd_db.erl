@@ -8,19 +8,36 @@
 -export([get_snippet/1, save_snippet/1, list_snippets/1]).
 -export([get_user/1, save_user/1]).
 -export([get_vote/1, save_vote/1, vote_count_for_snippet/1, vote_count_for_snippet/2]).
+-export([get_comment/1, save_comment/1, list_all_comments/1, list_comments_since/2]).
 
 %% --------------------------------------------------------------------------------------
 %% Snippet API Function Definitions
 %% --------------------------------------------------------------------------------------
 
 save_snippet(Snippet) ->
-   pooler:use_member(fun(RiakPid) -> csd_snippet_store:save(RiakPid, Snippet) end).
+  pooler:use_member(fun(RiakPid) -> csd_snippet_store:save(RiakPid, Snippet) end).
 
 get_snippet(SnippetKey) ->
   pooler:use_member(fun(RiakPid) -> csd_snippet_store:fetch(RiakPid, SnippetKey) end).
 
 list_snippets(UserId) ->
   pooler:use_member(fun(RiakPid) -> csd_snippet_store:list_for_user(RiakPid, UserId) end).
+
+%% --------------------------------------------------------------------------------------
+%% Comment API Function Definitions
+%% --------------------------------------------------------------------------------------
+
+get_comment(CommentId) ->
+  pooler:use_member(fun(RiakPid) -> csd_comment_store:fetch(RiakPid, CommentId) end).
+
+save_comment(Comment) ->
+  pooler:use_member(fun(RiakPid) -> csd_comment_store:save(RiakPid, Comment) end).
+
+list_all_comments(SnippetId) ->
+  pooler:use_member(fun(RiakPid) -> csd_comment_store:list_all(RiakPid, SnippetId) end).
+
+list_comments_since(SnippetId, Since) ->
+  pooler:use_member(fun(RiakPid) -> csd_comment_store:list_all_since(RiakPid, SnippetId, Since) end).
 
 %% --------------------------------------------------------------------------------------
 %% User API Function Definitions
