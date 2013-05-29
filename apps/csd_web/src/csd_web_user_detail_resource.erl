@@ -49,7 +49,7 @@ to_json(ReqData, State) ->
       list_to_binary(csd_user:get_name(UserInfo))
   end,
 
-  {ok, Snippets} = csd_snippet:list_for_user(UserId),
+  {ok, {Snippets, _SnippetCount}} = csd_snippet:list_for_user(UserId),
   UserData = {struct, [
       {user_name, UserName},
       {snippets, Snippets}

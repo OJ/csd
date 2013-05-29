@@ -45,7 +45,7 @@ start_common() ->
   ensure_started(public_key),
   ensure_started(ssl),
   ensure_started(mochiweb),
-  application:set_env(webmachine, webmachine_logger_module, webmachine_logger),
+  application:set_env(webmachine, webmachine_logger_module, webmachine_log),
   ensure_started(webmachine),
   ok.
 

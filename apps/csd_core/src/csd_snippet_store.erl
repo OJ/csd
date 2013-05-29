@@ -10,7 +10,7 @@
 %% API Function Exports
 %% --------------------------------------------------------------------------------------
 
--export([save/2, fetch/2, list_for_user/2]).
+-export([save/2, fetch/2, list_for_user/3, list_for_user/4]).
 
 %% --------------------------------------------------------------------------------------
 %% API Function Definitions
@@ -38,17 +38,17 @@ save(RiakPid, Snippet) ->
       persist(RiakPid, RiakObj, Snippet)
   end.
 
-list_for_user(RiakPid, UserId) ->
-  MR1 = csd_riak_mr:add_input_index(csd_riak_mr:create(), ?BUCKET, int,
-    ?USERID_INDEX, UserId),
-  MR2 = csd_riak_mr:add_map_js(MR1, ?LIST_MAP_JS, false),
-  MR3 = csd_riak_mr:add_reduce_sort_js(MR2, ?REDUCE_SORT_JS),
+list_for_user(RiakPid, UserId, PageSize) ->
+  list_for_user(RiakPid, UserId, PageSize, 0).
 
-  Result = case csd_riak_mr:run(RiakPid, MR3) of
-    {ok, [{1, List}]} -> List;
-    {ok, []} -> []
-  end,
-  {ok, Result}.
+list_for_user(RiakPid, UserId, PageSize, PageNumber) ->
+  Fields = [<<"key">>, <<"title">>, <<"created">>],
+  Opts = [{presort, <<"key">>}, {rows, PageSize}, {fl, Fields}, {start, PageSize * PageNumber}],
+  Search = iolist_to_binary([<<"user_id:">>, UserId]),
+  Result = csd_riak:search(RiakPid, ?BUCKET, Search, Opts),
+  {ok, {search_results, Results, _, Rows}} = Result,
+  Adjusted = [proplists:delete(<<"id">>, Props) || {<<"snippet">>, Props} <- Results],
+  {ok, {Adjusted, Rows}}.
 
 %% --------------------------------------------------------------------------------------
 %% Private Function Definitions

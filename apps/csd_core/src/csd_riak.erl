@@ -21,7 +21,8 @@
     set_index/4,
     set_indexes/2,
     index/2,
-    new_key/0
+    new_key/0,
+    search/4
   ]).
 
 %% ------------------------------------------------------------------
@@ -135,6 +136,11 @@ index(int, Name) ->
   iolist_to_binary([Name, ?INDEX_SUFFIX_INT]);
 index(bin, Name) ->
   iolist_to_binary([Name, ?INDEX_SUFFIX_BIN]).
+
+%% @doc Perform a search on a given index with specified options.
+search(RiakPid, Index, Search, Opts) ->
+  Result = riakc_pb_socket:search(RiakPid, Index, Search, Opts),
+  Result.
 
 %% ------------------------------------------------------------------
 %% Private Function Definitions

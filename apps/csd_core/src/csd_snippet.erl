@@ -1,6 +1,8 @@
 -module(csd_snippet).
 -author('OJ Reeves <oj@buffered.io>').
 
+-define(SNIPPET_PAGE_SIZE, 10).
+
 %% --------------------------------------------------------------------------------------
 %% API Function Exports
 %% --------------------------------------------------------------------------------------
@@ -10,6 +12,7 @@
     to_json/1,
     from_json/1,
     list_for_user/1,
+    list_for_user/2,
     fetch/1,
     save/1,
     set_user_id/2,
@@ -35,6 +38,8 @@
 %% API Function Definitions
 %% --------------------------------------------------------------------------------------
 
+  %iolist_to_binary([Key, integer_to_list(Timestamp)]).
+
 to_snippet(Title, Left, Right, UserId) ->
   Now = erlang:now(),
   #snippet{
@@ -47,7 +52,10 @@ to_snippet(Title, Left, Right, UserId) ->
   }.
 
 list_for_user(UserId) ->
-  csd_db:list_snippets(UserId).
+  list_for_user(UserId, 0).
+
+list_for_user(UserId, PageNumber) ->
+  csd_db:list_snippets(UserId, ?SNIPPET_PAGE_SIZE, PageNumber).
 
 fetch(SnippetKey) when is_list(SnippetKey) ->
   fetch(list_to_binary(SnippetKey));
@@ -73,8 +81,9 @@ set_key(Snippet=#snippet{}, NewKey) ->
     key = NewKey
   }.
 
-to_json(#snippet{key=K, title=T, left=L, right=R, created=C}) ->
+to_json(#snippet{user_id=U, key=K, title=T, left=L, right=R, created=C}) ->
   Data = [
+    {user_id, U},
     {key, K},
     {title, T},
     {left, L},
@@ -86,6 +95,7 @@ to_json(#snippet{key=K, title=T, left=L, right=R, created=C}) ->
 from_json(SnippetJson) ->
   Data = csd_json:from_json(SnippetJson, fun is_string/1),
   #snippet{
+    user_id = proplists:get_value(user_id, Data),
     key = proplists:get_value(key, Data),
     title = proplists:get_value(title, Data),
     left = proplists:get_value(left, Data),
@@ -103,5 +113,3 @@ is_string(right) -> true;
 is_string(created) -> true;
 is_string(_) -> false.
 
-to_id(Key, Timestamp) ->
-  iolist_to_binary([Key, integer_to_list(Timestamp)]).
