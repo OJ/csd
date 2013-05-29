@@ -12,9 +12,15 @@
     add_map_js/2,
     add_map_js/3,
     add_map_js/4,
+    add_map_erl/3,
+    add_map_erl/4,
+    add_map_erl/5,
     add_reduce_js/2,
     add_reduce_js/3,
     add_reduce_js/4,
+    add_reduce_erl/3,
+    add_reduce_erl/4,
+    add_reduce_erl/5,
     add_reduce_sort_js/2,
     add_reduce_sort_js/3
   ]).
@@ -70,6 +76,17 @@ add_map_js(MR=#mr{phases=P}, JsSource, Keep, Arg) ->
     phases = [{map, {jsanon, JsSource}, Arg, Keep}|P]
   }.
 
+add_map_erl(MR=#mr{}, Mod, Fun) ->
+  add_map_erl(MR, Mod, Fun, true).
+
+add_map_erl(MR=#mr{}, Mod, Fun, Keep) ->
+  add_map_erl(MR, Mod, Fun, Keep, none).
+
+add_map_erl(MR=#mr{phases=P}, Mod, Fun, Keep, Arg) ->
+  MR#mr{
+    phases = [{map, {modfun, Mod, Fun}, Arg, Keep}|P]
+  }.
+
 %% @doc Creates a map/reduce Reduce phase from raw JS source. This overload
 %%      defaults Keep to true and Arg to none.
 add_reduce_js(MR=#mr{}, JsSource) ->
@@ -84,6 +101,17 @@ add_reduce_js(MR=#mr{}, JsSource, Keep) ->
 add_reduce_js(MR=#mr{phases=P}, JsSource, Keep, Arg) ->
   MR#mr{
     phases = [{reduce, {jsanon, JsSource}, Arg, Keep}|P]
+  }.
+
+add_reduce_erl(MR=#mr{}, Mod, Fun) ->
+  add_reduce_erl(MR, Mod, Fun, true).
+
+add_reduce_erl(MR=#mr{}, Mod, Fun, Keep) ->
+  add_reduce_erl(MR, Mod, Fun, Keep, none).
+
+add_reduce_erl(MR=#mr{phases=P}, Mod, Fun, Keep, Arg) ->
+  MR#mr{
+    phases = [{reduce, {modfun, Mod, Fun}, Arg, Keep}|P]
   }.
 
 %% @doc Creates a map/reduce Reduce sort phase using Riak's built in sort function

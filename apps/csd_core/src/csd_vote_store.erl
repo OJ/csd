@@ -3,11 +3,11 @@
 
 -define(BUCKET, <<"vote">>).
 -define(SNIPPET_INDEX, <<"snippetid">>).
+-define(WHICH_INDEX, <<"which">>).
 -define(USER_INDEX, <<"userid">>).
--define(COUNT_VOTE_MAP_JS, <<"function(v){var d=Riak.mapValuesJson(v)[0];if(d.which===\"left\"){return[[1,0]];}return[[0,1]];}">>).
--define(COUNT_VOTE_RED_JS, <<"function(vals,arg){if(vals.length===0){return[[0,0]];}return[vals.reduce(function(a,v){return[a[0]+v[0],a[1]+v[1]];})];}">>).
--define(COUNT_VOTE_USER_MAP_JS, <<"function(v,k,a){var d=Riak.mapValuesJson(v)[0];var which=d.user_id===a?d.which:\"\";if(d.which===\"left\"){return[[1,0,which]];}return[[0,1,which]];}">>).
--define(COUNT_VOTE_USER_RED_JS, <<"function(vals,arg){if(vals.length===0){return[[0,0,\"\"]];}return[vals.reduce(function(a,v){return[a[0]+v[0],a[1]+v[1],a[2].length>0?a[2]:v[2]];})];}">>).
+-define(MR_MOD, csd_riak_mapreduce).
+-define(MR_MAP_COUNT, map_count_votes).
+-define(MR_RED_COUNT, reduce_count_votes).
 
 %% --------------------------------------------------------------------------------------
 %% API Function Exports
@@ -30,22 +30,19 @@ fetch(RiakPid, VoteId) ->
   end.
 
 count_for_snippet(RiakPid, SnippetId) ->
-  MR1 = csd_riak_mr:add_input_index(csd_riak_mr:create(), ?BUCKET, bin,
-    ?SNIPPET_INDEX, SnippetId),
-  MR2 = csd_riak_mr:add_map_js(MR1, ?COUNT_VOTE_MAP_JS, false),
-  MR3 = csd_riak_mr:add_reduce_js(MR2, ?COUNT_VOTE_RED_JS),
-  case csd_riak_mr:run(RiakPid, MR3) of
-    {ok, [{1, [[Left, Right]]}]} -> {ok, {Left, Right}};
+  case count_for_snippet(RiakPid, SnippetId, <<"">>) of
+    {ok, {Left, Right, _}} -> {ok, {Left, Right}};
     Error -> Error
   end.
 
 count_for_snippet(RiakPid, SnippetId, UserId) ->
   MR1 = csd_riak_mr:add_input_index(csd_riak_mr:create(), ?BUCKET, bin,
     ?SNIPPET_INDEX, SnippetId),
-  MR2 = csd_riak_mr:add_map_js(MR1, ?COUNT_VOTE_USER_MAP_JS, false, UserId),
-  MR3 = csd_riak_mr:add_reduce_js(MR2, ?COUNT_VOTE_USER_RED_JS),
+  MR2 = csd_riak_mr:add_map_erl(MR1, ?MR_MOD, ?MR_MAP_COUNT, false, UserId),
+  MR3 = csd_riak_mr:add_reduce_erl(MR2, ?MR_MOD, ?MR_RED_COUNT),
   case csd_riak_mr:run(RiakPid, MR3) of
-    {ok, [{1, [[Left, Right, Which]]}]} -> {ok, {Left, Right, Which}};
+    {ok, []} -> {ok, {0, 0, <<"">>}};
+    {ok, [{1, [Left, Right, Which]}]} -> {ok, {Left, Right, Which}};
     Error -> Error
   end.
 
@@ -53,6 +50,7 @@ save(RiakPid, Vote) ->
   VoteId = csd_vote:get_id(Vote),
   UserId = csd_vote:get_user_id(Vote),
   SnippetId = csd_vote:get_snippet_id(Vote),
+  Which = csd_vote:get_which(Vote),
 
   case csd_riak:fetch(RiakPid, ?BUCKET, VoteId) of
     {ok, _RiakObj} ->
@@ -61,7 +59,8 @@ save(RiakPid, Vote) ->
       RiakObj = csd_riak:create(?BUCKET, VoteId, csd_vote:to_json(Vote)),
       Indexes = [
         {bin, ?SNIPPET_INDEX, SnippetId},
-        {int, ?USER_INDEX, UserId}
+        {int, ?USER_INDEX, UserId},
+        {bin, ?WHICH_INDEX, Which}
       ],
 
       NewRiakObj = csd_riak:set_indexes(RiakObj, Indexes),
