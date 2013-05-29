@@ -36,13 +36,14 @@
 %% --------------------------------------------------------------------------------------
 
 to_snippet(Title, Left, Right, UserId) ->
+  Now = erlang:now(),
   #snippet{
     user_id = UserId,
     key = csd_riak:new_key(),
     title = Title,
     left = Left,
     right = Right,
-    created = csd_date:utc_now()
+    created = csd_date:utc(Now)
   }.
 
 list_for_user(UserId) ->
@@ -102,3 +103,5 @@ is_string(right) -> true;
 is_string(created) -> true;
 is_string(_) -> false.
 
+to_id(Key, Timestamp) ->
+  iolist_to_binary([Key, integer_to_list(Timestamp)]).

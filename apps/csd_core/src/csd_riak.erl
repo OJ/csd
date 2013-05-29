@@ -21,8 +21,7 @@
     set_index/4,
     set_indexes/2,
     index/2,
-    new_key/0,
-    new_key/1
+    new_key/0
   ]).
 
 %% ------------------------------------------------------------------
@@ -125,20 +124,11 @@ save(RiakPid, RiakObj) ->
 
 %% @spec new_key() -> key()
 %% @doc Generate an close-to-unique key that can be used to identify
-%%      an object in riak. This implementation is blatantly borrowed
-%%      (purloined) from the wriaki source (thanks basho!)
+%%      an object in riak. We now make use of Flake to do this for us.
 new_key() ->
-  {{Yr, Mo, Dy}, {Hr, Mn, Sc}} = erlang:universaltime(),
-  {_, _, Now} = now(),
-  new_key([Yr, Mo, Dy, Hr, Mn, Sc, node(), Now]).
-
-%% @spec new_key(list()) -> key()
-%% @doc Generate an close-to-unique key that can be used to identify
-%%      an object in riak using the given list parameter as the stuff
-%%      to hash.
-new_key(List) ->
-  Hash = erlang:phash2(List),
-  base64:encode(<<Hash:32>>).
+  %% Base-62 key gives us keys with 0-9, a-Z and A-Z
+  {ok, Key} = flake_server:id(62),
+  list_to_binary(Key).
 
 %% @doc Create an index of a given name based on the type.
 index(int, Name) ->

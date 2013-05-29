@@ -27,7 +27,7 @@ deps:
 	@$(REBAR) get-deps
 
 clean:
-	@$(REBAR) clean && rm apps/csd_core/riak_modules/*.beam
+	@$(REBAR) clean
 
 distclean: clean
 	@$(REBAR) delete-deps
