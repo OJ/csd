@@ -56,7 +56,14 @@ list_for_user(UserId) ->
 
 list_for_user(UserId, PageNumber) ->
   FieldsToKeep = [<<"created">>, <<"title">>, <<"key">>],
-  csd_db:list_snippets(UserId, FieldsToKeep, ?SNIPPET_PAGE_SIZE, PageNumber).
+  {ok, {Snippets, TotalSnippets}} = csd_db:list_snippets(UserId, FieldsToKeep,
+    ?SNIPPET_PAGE_SIZE, PageNumber),
+
+  Pages = case {TotalSnippets div ?SNIPPET_PAGE_SIZE, TotalSnippets rem ?SNIPPET_PAGE_SIZE} of
+    {P, 0} -> P;
+    {P, _} -> P + 1
+  end,
+  {ok, {Snippets, PageNumber, Pages}}.
 
 fetch(SnippetKey) when is_list(SnippetKey) ->
   fetch(list_to_binary(SnippetKey));

@@ -244,6 +244,10 @@
 
   var UserModel = Backbone.Model.extend({
     initialize: function(spec) {
+      // TODO: do something with the page/pages values so that
+      // the users can page through the snippets.
+      this.set('page', spec.page + 1);
+      this.set('pages', spec.pages);
       this.set('snippets', _.map(spec.snippets, function(s) {
         return {
           key: s.key,
