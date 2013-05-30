@@ -46,16 +46,16 @@ to_json(ReqData, State) ->
       Name;
     _ ->
       {ok, UserInfo} = csd_user:fetch(UserId),
-      list_to_binary(csd_user:get_name(UserInfo))
+      csd_user:get_name(UserInfo)
   end,
 
   {ok, {Snippets, Page, Pages}} = csd_snippet:list_for_user(UserId),
-  UserData = {struct, [
-      {user_name, UserName},
-      {snippets, Snippets},
-      {page, Page},
-      {pages, Pages}
+  UserData = {[
+      {<<"user_name">>, UserName},
+      {<<"snippets">>, [{S} || S <- Snippets]},
+      {<<"page">>, Page},
+      {<<"pages">>, Pages}
     ]},
-  Json = mochijson2:encode(UserData),
+  Json = jiffy:encode(UserData),
   {Json, ReqData, State}.
 

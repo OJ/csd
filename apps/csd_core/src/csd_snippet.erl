@@ -45,9 +45,9 @@ to_snippet(Title, Left, Right, UserId) ->
   #snippet{
     user_id = UserId,
     key = csd_riak:new_key(),
-    title = Title,
-    left = Left,
-    right = Right,
+    title = csd_util:to_binary(Title),
+    left = csd_util:to_binary(Left),
+    right = csd_util:to_binary(Right),
     created = csd_date:utc(Now)
   }.
 
@@ -90,34 +90,27 @@ set_key(Snippet=#snippet{}, NewKey) ->
   }.
 
 to_json(#snippet{user_id=U, key=K, title=T, left=L, right=R, created=C}) ->
-  Data = [
-    {user_id, U},
-    {key, K},
-    {title, T},
-    {left, L},
-    {right, R},
-    {created, C}
-  ],
-  csd_json:to_json(Data, fun is_string/1).
+  jiffy:encode({[
+    {<<"user_id">>, U},
+    {<<"key">>, K},
+    {<<"title">>, T},
+    {<<"left">>, L},
+    {<<"right">>, R},
+    {<<"created">>, C}
+  ]}).
 
 from_json(SnippetJson) ->
-  Data = csd_json:from_json(SnippetJson, fun is_string/1),
+  {Data} = jiffy:decode(SnippetJson),
   #snippet{
-    user_id = proplists:get_value(user_id, Data),
-    key = proplists:get_value(key, Data),
-    title = proplists:get_value(title, Data),
-    left = proplists:get_value(left, Data),
-    right = proplists:get_value(right, Data),
-    created = proplists:get_value(created, Data)
+    user_id = proplists:get_value(<<"user_id">>, Data),
+    key = proplists:get_value(<<"key">>, Data),
+    title = proplists:get_value(<<"title">>, Data),
+    left = proplists:get_value(<<"left">>, Data),
+    right = proplists:get_value(<<"right">>, Data),
+    created = proplists:get_value(<<"created">>, Data)
   }.
 
 %% --------------------------------------------------------------------------------------
 %% Private Function Definitions
 %% --------------------------------------------------------------------------------------
-
-is_string(title) -> true;
-is_string(left) -> true;
-is_string(right) -> true;
-is_string(created) -> true;
-is_string(_) -> false.
 

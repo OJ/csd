@@ -30,9 +30,9 @@
 
 to_user(Id, Name) ->
   #user{
-    name = Name,
+    name = csd_util:to_binary(Name),
     id = Id,
-    joined = csd_date:utc_now()
+    joined = csd_util:utc_now()
   }.
 
 get_id(#user{id=Id}) ->
@@ -48,20 +48,21 @@ save(User=#user{}) ->
   csd_db:save_user(User).
 
 to_json(#user{name=N, id=T, joined=J}) ->
-  csd_json:to_json([{name, N}, {id, T}, {joined, J}], fun is_string/1).
+  jiffy:encode({[
+      {<<"name">>, N},
+      {<<"id">>, T},
+      {<<"joined">>, J}
+    ]}).
 
 from_json(UserJson) ->
-  User = csd_json:from_json(UserJson, fun is_string/1),
+  {User} = jiffy:decode(UserJson),
   #user{
-    id = proplists:get_value(id, User),
-    name = proplists:get_value(name, User),
-    joined = proplists:get_value(joined, User)
+    id = proplists:get_value(<<"id">>, User),
+    name = proplists:get_value(<<"name">>, User),
+    joined = proplists:get_value(<<"joined">>, User)
   }.
 
 %% --------------------------------------------------------------------------------------
 %% Internal Function Definitions
 %% --------------------------------------------------------------------------------------
 
-is_string(name) -> true;
-is_string(joined) -> true;
-is_string(_) -> false.

@@ -22,8 +22,7 @@
 %% --------------------------------------------------------------------------------------
 
 auth_required_json() ->
-  Json = {struct, {"error", "unauthorized"}},
-  mochijson2:encode(Json).
+  jiffy:encode({[{<<"error">>, <<"unauthorized">>}]}).
 
 remove_auth(ReqData) ->
   store_auth_cookie(ReqData, "", -1).

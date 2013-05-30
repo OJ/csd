@@ -33,7 +33,7 @@ moved_temporarily(ReqData, State) ->
 
   {ok, AccessToken, AccessTokenSecret} = twitter:verify_access(ReqToken, ReqTokenSecret, Verifier),
   {ok, UserInfoJson} = twitter:get_current_user_info(AccessToken, AccessTokenSecret),
-  {struct, Json} = mochijson2:decode(UserInfoJson),
+  {Json} = jiffy:decode(UserInfoJson),
   UserId = proplists:get_value(<<"id">>, Json),
   UserName = proplists:get_value(<<"screen_name">>, Json),
   NewReqData = cookie:store_auth(ReqData, UserId, UserName, AccessToken, AccessTokenSecret),

@@ -64,19 +64,19 @@ count_for_snippet(SnippetId, UserId) ->
   }}.
 
 to_json(#vote{time=T, which=W, snippet_id=S, user_id=U}) ->
-  csd_json:to_json([
-      {time, T},
-      {user_id, U},
-      {snippet_id, S},
-      {which, W}],
-    fun is_string/1);
+  jiffy:encode({[
+      {<<"time">>, T},
+      {<<"user_id">>, U},
+      {<<"snippet_id">>, S},
+      {<<"which">>, W}
+    ]});
 
 to_json(#count{left=L, right=R, which=W}) ->
-  csd_json:to_json([
-      {left, L},
-      {right, R},
-      {which, W}],
-    fun is_string/1).
+  jiffy:encode({[
+      {<<"left">>, L},
+      {<<"right">>, R},
+      {<<"which">>, W}
+    ]}).
 
 fetch(UserId, SnippetId) when is_integer(UserId) ->
   csd_db:get_vote(get_id(UserId, SnippetId)).
@@ -97,23 +97,23 @@ get_id(#vote{user_id=U, snippet_id=S}) ->
   get_id(U, S).
 
 get_id(UserId, SnippetId) when is_integer(UserId) ->
-  iolist_to_binary([integer_to_list(UserId), "-", SnippetId]).
+  iolist_to_binary([integer_to_list(UserId), <<"-">>, SnippetId]).
 
 from_json(Json) ->
-  List = csd_json:from_json(Json, fun is_string/1),
+  {List} = jiffy:decode(Json),
   #vote{
-    time = proplists:get_value(time, List),
-    user_id = proplists:get_value(user_id, List),
-    snippet_id = proplists:get_value(snippet_id, List),
-    which = proplists:get_value(which, List)
+    time = proplists:get_value(<<"time">>, List),
+    user_id = proplists:get_value(<<"user_id">>, List),
+    snippet_id = proplists:get_value(<<"snippet_id">>, List),
+    which = proplists:get_value(<<"which">>, List)
   }.
 
 random_votes(SnippetId, NumVotes) ->
   random:seed(erlang:now()),
   lists:map(fun(_) ->
         Which = case random:uniform(99999999) rem 2 of
-          0 -> "left";
-          _ -> "right"
+          0 -> <<"left">>;
+          _ -> <<"right">>
         end,
         V = to_vote(random:uniform(99999999), SnippetId, Which),
         save(V) end, lists:seq(1, NumVotes)),
@@ -126,13 +126,8 @@ random_votes(SnippetId, NumVotes) ->
 to_vote_inner(UserId, SnippetId, Which) ->
   #vote{
     user_id = UserId,
-    snippet_id = SnippetId,
-    time = csd_date:utc_now(),
-    which = Which
+    snippet_id = csd_util:to_binary(SnippetId),
+    time = csd_util:utc_now(),
+    which = csd_util:to_binary(Which)
   }.
-
-is_string(time) -> true;
-is_string(which) -> true;
-is_string(snippet_id) -> true;
-is_string(_) -> false.
 

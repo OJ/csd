@@ -1,4 +1,4 @@
--module(csd_date).
+-module(csd_util).
 -author('OJ Reeves <oj@buffered.io>').
 
 -define(EPOCH_DIFF, 62167219200).
@@ -7,7 +7,7 @@
 %% API Function Exports
 %% --------------------------------------------------------------------------------------
 
--export([utc_now/0, utc/1, epoch_utc_now/0, epoch_utc/1]).
+-export([utc_now/0, utc/1, epoch_utc_now/0, epoch_utc/1, to_binary/1]).
 
 %% --------------------------------------------------------------------------------------
 %% API Function Definitions
@@ -25,3 +25,12 @@ epoch_utc_now() ->
 
 epoch_utc(Now) ->
   calendar:datetime_to_gregorian_seconds(calendar:now_to_universal_time(Now)) - ?EPOCH_DIFF.
+
+to_binary(X) when is_atom(X) ->
+  to_binary(atom_to_list(X));
+to_binary(X) when is_integer(X) ->
+  to_binary(integer_to_list(X));
+to_binary(X) when is_list(X) ->
+  list_to_binary(X);
+to_binary(X) when is_binary(X) ->
+  X.
