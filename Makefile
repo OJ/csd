@@ -18,7 +18,7 @@ app: modules
 	@$(REBAR) compile skip_deps=true
 
 depmod:
-	~/code/riak/dev/dev1/bin/riak-admin erl-reload \
+	@~/code/riak/dev/dev1/bin/riak-admin erl-reload \
 		&& ~/code/riak/dev/dev2/bin/riak-admin erl-reload \
 		&& ~/code/riak/dev/dev3/bin/riak-admin erl-reload \
 		&& ~/code/riak/dev/dev4/bin/riak-admin erl-reload

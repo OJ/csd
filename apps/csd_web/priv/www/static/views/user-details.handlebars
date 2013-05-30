@@ -31,4 +31,17 @@
       </table>
     </div>
   </div>
+  {{#if has_pages}}
+  <div class="row">
+    <div class="span8">
+      <div class="pagination pagination-small">
+        <ul>
+          {{#each pages}}
+          <li{{#if this.current}} class="active"{{/if}}><a href="#user/{{../user_id}}/{{this.index}}">{{this.label}}</a></li>
+          {{/each}}
+        </ul>
+      </div>
+    </div>
+  </div>
+  {{/if}}
 </section>

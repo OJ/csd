@@ -244,9 +244,8 @@
 
   var UserModel = Backbone.Model.extend({
     initialize: function(spec) {
-      // TODO: do something with the page/pages values so that
-      // the users can page through the snippets.
-      this.set('page', spec.page + 1);
+      this.set('user_id', spec.user_id);
+      this.set('page', spec.page);
       this.set('pages', spec.pages);
       this.set('snippets', _.map(spec.snippets, function(s) {
         return {
@@ -257,17 +256,31 @@
       }));
     },
     toJSON: function() {
+      var pages = [];
+      for (var i = 0; i < this.get('pages'); ++i) {
+        pages.push({
+          index: i,
+          label: i + 1,
+          current: i == this.get('page')
+        });
+      }
+
       return {
         is_current: this.get('is_current'),
+        user_id: this.get('user_id'),
         user_name: this.get('user_name'),
-        snippets: this.get('snippets')
+        snippets: this.get('snippets'),
+        has_pages: pages.length > 1,
+        pages: pages
       };
     }
   });
 
   var UserView = Backbone.View.extend({
     render: function() {
-      var html = router.renderTemplate('user-details', this.model.toJSON());
+      var json = this.model.toJSON();
+      console.log(json);
+      var html = router.renderTemplate('user-details', json);
       $(this.el).html(html);
       return this.el;
     }
@@ -279,6 +292,7 @@
     routes: {
       'login': 'login',
       'user/:id': 'userHome',
+      'user/:id/:page': 'userHome',
       'new-snippet': 'newSnippet',
       'snippet/:id': 'getSnippet',
       '': 'home'
@@ -322,10 +336,16 @@
       }
     },
 
-    userHome: function(id) {
+    userHome: function(id, page) {
       var self = this;
-      $.getJSON('/userdetail/' + id, function(user) {
+      var path = '/userdetail/' + id;
+      if (page) { path += '/' + page; }
+
+      console.log(path);
+
+      $.getJSON(path, function(user) {
         user.is_current = self.currentUserId == id;
+        user.user_id = id;
         var model = new UserModel(user);
         var view = new UserView({model: model});
         self.setView(view, model.get('user_name'));

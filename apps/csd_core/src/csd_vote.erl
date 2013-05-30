@@ -112,8 +112,8 @@ random_votes(SnippetId, NumVotes) ->
   random:seed(erlang:now()),
   lists:map(fun(_) ->
         Which = case random:uniform(99999999) rem 2 of
-          0 -> <<"left">>;
-          _ -> <<"right">>
+          0 -> "left";
+          _ -> "right"
         end,
         V = to_vote(random:uniform(99999999), SnippetId, Which),
         save(V) end, lists:seq(1, NumVotes)),

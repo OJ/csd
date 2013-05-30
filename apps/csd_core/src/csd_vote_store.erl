@@ -42,7 +42,7 @@ count_for_snippet(RiakPid, SnippetId, UserId) ->
   MR3 = csd_riak_mr:add_reduce_erl(MR2, ?MR_MOD, ?MR_RED_COUNT),
   case csd_riak_mr:run(RiakPid, MR3) of
     {ok, []} -> {ok, {0, 0, <<"">>}};
-    {ok, [{1, [Left, Right, Which]}]} -> {ok, {Left, Right, Which}};
+    {ok, [{1, [[Left, Right, Which]]}]} -> {ok, {Left, Right, Which}};
     Error -> Error
   end.
 

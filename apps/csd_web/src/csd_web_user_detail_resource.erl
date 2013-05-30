@@ -37,6 +37,10 @@ allowed_methods(ReqData, State) ->
 to_json(ReqData, State) ->
   PathInfo = wrq:path_info(ReqData),
   {ok, UserId} = dict:find(user_id, PathInfo),
+  SnippetPage = case dict:find(page_num, PathInfo) of
+    {ok, Val} -> list_to_integer(Val);
+    _ -> 0
+  end,
 
   % We need to render a username, but don't hit the DB
   % if the user is the same as the one looking at the
@@ -49,7 +53,7 @@ to_json(ReqData, State) ->
       csd_user:get_name(UserInfo)
   end,
 
-  {ok, {Snippets, Page, Pages}} = csd_snippet:list_for_user(UserId),
+  {ok, {Snippets, Page, Pages}} = csd_snippet:list_for_user(UserId, SnippetPage),
   UserData = {[
       {<<"user_name">>, UserName},
       {<<"snippets">>, [{S} || S <- Snippets]},
