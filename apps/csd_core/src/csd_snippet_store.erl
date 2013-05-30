@@ -3,14 +3,12 @@
 
 -define(BUCKET, <<"snippet">>).
 -define(USERID_INDEX, "userid").
--define(LIST_MAP_JS, <<"function(v){var d = Riak.mapValuesJson(v)[0]; return [{key:d.key,title:d.title,created:d.created}];}">>).
--define(REDUCE_SORT_JS, <<"function(a,b){return a.created<b.created?1:(a.created>b.created?-1:0);}">>).
 
 %% --------------------------------------------------------------------------------------
 %% API Function Exports
 %% --------------------------------------------------------------------------------------
 
--export([save/2, fetch/2, list_for_user/3, list_for_user/4]).
+-export([save/2, fetch/2, list_for_user/4, list_for_user/5]).
 
 %% --------------------------------------------------------------------------------------
 %% API Function Definitions
@@ -38,17 +36,22 @@ save(RiakPid, Snippet) ->
       persist(RiakPid, RiakObj, Snippet)
   end.
 
-list_for_user(RiakPid, UserId, PageSize) ->
-  list_for_user(RiakPid, UserId, PageSize, 0).
+list_for_user(RiakPid, UserId, FieldsToKeep, PageSize) ->
+  list_for_user(RiakPid, UserId, FieldsToKeep, PageSize, 0).
 
-list_for_user(RiakPid, UserId, PageSize, PageNumber) ->
-  Fields = [<<"key">>, <<"title">>, <<"created">>],
-  Opts = [{presort, <<"key">>}, {rows, PageSize}, {fl, Fields}, {start, PageSize * PageNumber}],
+list_for_user(RiakPid, UserId, FieldsToKeep, PageSize, PageNumber) ->
+  Opts = [
+    {presort, <<"key">>},
+    {rows, PageSize},
+    {fl, FieldsToKeep},
+    {start, PageSize * PageNumber}
+  ],
+
   Search = iolist_to_binary([<<"user_id:">>, UserId]),
   Result = csd_riak:search(RiakPid, ?BUCKET, Search, Opts),
   {ok, {search_results, Results, _, Rows}} = Result,
-  Adjusted = [proplists:delete(<<"id">>, Props) || {<<"snippet">>, Props} <- Results],
-  {ok, {Adjusted, Rows}}.
+  Snippets = [proplists:delete(<<"id">>, Props) || {<<"snippet">>, Props} <- Results],
+  {ok, {Snippets, Rows}}.
 
 %% --------------------------------------------------------------------------------------
 %% Private Function Definitions
